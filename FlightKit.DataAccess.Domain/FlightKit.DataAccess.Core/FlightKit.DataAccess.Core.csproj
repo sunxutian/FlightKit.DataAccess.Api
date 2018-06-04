@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="GraphQL" Version="0.17.3" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\FlightKit.DataAccess.Application\FlightKit.DataAccess.Application.csproj" />
+    <ProjectReference Include="..\FlightKit.DataAccess.Domain\FlightKit.DataAccess.Domain.csproj" />
+  </ItemGroup>
+
+</Project>
