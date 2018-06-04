@@ -5,10 +5,7 @@ using FlightKit.DataAccess.Domain.Data.Entity;
 using FlightKit.DataAccess.Domain.Repo;
 using GraphQL.Types;
 using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace FlightKit.DataAccess.Core.GraphQL
 {

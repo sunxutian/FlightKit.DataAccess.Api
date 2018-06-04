@@ -65,11 +65,16 @@ namespace FlightKit.DataAccess.Api
             services.AddSingleton<ISchema, FlightKitDataAccessSchema>();
 
             services.AddGraphQLHttp();
-            services.Configure<ExecutionOptions>(options =>
+
+            if (HostingEnvironment.IsDevelopment())
             {
-                options.EnableMetrics = true;
-                options.ExposeExceptions = true;
-            });
+                services.Configure<ExecutionOptions>(options =>
+                {
+                    options.EnableMetrics = true;
+                    options.ExposeExceptions = true;
+                });
+            }
+
             // initialize injector
             IntegrateSimpleInjector(services);
         }
@@ -87,8 +92,11 @@ namespace FlightKit.DataAccess.Api
             // add http for Schema at default url /graphql
             app.UseGraphQLHttp<ISchema>(new GraphQLHttpOptions());
 
-            // use graphql-playground at default url /ui/playground
-            app.UseGraphQLPlayground(new GraphQLPlaygroundOptions());
+            if (env.IsDevelopment())
+            {
+                // use graphql-playground at default url /ui/playground
+                app.UseGraphQLPlayground(new GraphQLPlaygroundOptions());
+            }
 
             app.UseMvc();
         }

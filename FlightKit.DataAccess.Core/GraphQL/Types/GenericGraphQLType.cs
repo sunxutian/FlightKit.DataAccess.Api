@@ -3,6 +3,7 @@ using GraphQL.Types;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 
 namespace FlightKit.DataAccess.Core.GraphQL.Types
 {
@@ -10,41 +11,27 @@ namespace FlightKit.DataAccess.Core.GraphQL.Types
     {
         public GenericGraphQLType()
         {
-            Name = typeof(TApplication).Name.ToCamelCase();
+            Name = typeof(TApplication).Name;
             Description = $"Risk {Name}";
 
-            var allPrimitivProperties = typeof(TApplication).GetProperties().Where(p =>
+            var properties = typeof(TApplication)
+                .GetProperties(BindingFlags.Public | BindingFlags.Instance)
+                .Where(p => (p.PropertyType.GetTypeInfo().IsValueType
+                        && p.PropertyType.GetTypeInfo() != typeof(Guid)
+                        && p.PropertyType.GetTypeInfo() != typeof(Guid?))
+                || p.PropertyType == typeof(string));
+
+            foreach (var propertyInfo in properties)
             {
-                var t = p.PropertyType;
+                var (underlineType, isNullable) = IfNullableType(propertyInfo.PropertyType);
+                underlineType = underlineType == typeof(short) ? typeof(int) : underlineType;
 
-                if (t == typeof(string))
-                {
-                    return true;
-                }
-
-                if (t.IsConstructedGenericType)
-                {
-                    return !typeof(ICollection<>).IsAssignableFrom(t.GetGenericTypeDefinition())
-                        && !t.GetGenericArguments().Any(g => g == typeof(Guid));
-                }
-
-                return t != typeof(Guid) && !t.IsArray && !t.IsClass;
-            });
+                Field(underlineType.GetGraphTypeFromType(isNullable),
+                    propertyInfo.Name.ToCamelCase());
+            }
 
             var idProperties = typeof(TApplication).GetProperties().Where(p => p.PropertyType == typeof(Guid) || p.PropertyType == typeof(Guid?));
 
-            foreach (var primitiveProperty in allPrimitivProperties)
-            {
-                var (underlineType, isNullable) = IfNullableType(primitiveProperty.PropertyType);
-                if (underlineType == typeof(short))
-                {
-                    underlineType = typeof(int);
-                }
-
-                Type graphType = underlineType.GetGraphTypeFromType(isNullable);
-                Field(graphType, primitiveProperty.Name.ToCamelCase(),
-                    resolve: context => primitiveProperty.GetValue(context.Source));
-            }
 
             foreach (var idProperty in idProperties)
             {
@@ -56,7 +43,7 @@ namespace FlightKit.DataAccess.Core.GraphQL.Types
 
         private (Type, bool) IfNullableType(Type t)
         {
-            if (t.IsConstructedGenericType && t.GetGenericTypeDefinition() == typeof(Nullable<>))
+            if (t.IsNullable())
             {
                 return (t.GetGenericArguments()[0], true);
             }
