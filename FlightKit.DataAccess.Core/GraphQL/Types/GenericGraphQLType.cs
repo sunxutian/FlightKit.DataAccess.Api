@@ -11,8 +11,7 @@ namespace FlightKit.DataAccess.Core.GraphQL.Types
     {
         public GenericGraphQLType()
         {
-            Name = typeof(TApplication).Name;
-            Description = $"Risk {Name}";
+            Name = typeof(TApplication).Name.ToCamelCase();
 
             var properties = typeof(TApplication)
                 .GetProperties(BindingFlags.Public | BindingFlags.Instance)
