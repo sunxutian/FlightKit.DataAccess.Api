@@ -11,7 +11,7 @@ namespace FlightKit.DataAccess.Core.GraphQL
 {
     public class FlightKitDataAccessQuery : ObjectGraphType<object>
     {
-        public FlightKitDataAccessQuery(Func<IDbRepository<Risk_Report>> repoFactory, IMappingHelperService mapper)
+        public FlightKitDataAccessQuery(Func<IFlightKitReportDataService> reportDataService)
         {
             Name = "Query";
 
@@ -20,15 +20,16 @@ namespace FlightKit.DataAccess.Core.GraphQL
                 resolve: async context =>
                     {
                         var id = context.GetArgument<Guid>("reportId");
-                        var reports = await mapper.GetMappedDtoFromDbAsync<Risk_Report, RiskReport>(repoFactory(), r => r.ReportIdentifier == id);
-                        return reports.FirstOrDefault();
+                        var report = await reportDataService().GetRiskReportByReportId(id).ConfigureAwait(false);
+                        return report;
                     });
             FieldAsync<ListGraphType<RiskReportType>>("riskReportsByRiskId",
                 arguments: new QueryArguments(new QueryArgument<StringGraphType> { Name = "riskId", Description = "Risk Id" }),
                 resolve: async context =>
                 {
                     var riskId = context.GetArgument<string>("riskId");
-                    return await mapper.GetMappedDtoFromDbAsync<Risk_Report, RiskReport>(repoFactory(), r => r.RiskId == riskId);
+                    var reports = await reportDataService().GetRiskReportsByRiskId(riskId).ConfigureAwait(false);
+                    return reports;
                 });
         }
     }

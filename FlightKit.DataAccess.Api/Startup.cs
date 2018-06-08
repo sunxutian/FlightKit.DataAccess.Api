@@ -144,12 +144,14 @@ namespace FlightKit.DataAccess.Api
             SetupAutoMapper(container);
             SetupGraphQL(container);
             SetupService(container);
-            AllowResolvingFuncFactories(container.Options);
+            //AllowResolvingFuncFactories(container.Options);
         }
 
         private void SetupService(Container container)
         {
             container.RegisterSingleton<IMappingHelperService, MappingHelperService>();
+            container.Register<IFlightKitReportDataService, FlightKitReportDataService>(Lifestyle.Scoped);
+            RegisterFuncFactory<IFlightKitReportDataService, FlightKitReportDataService>(container, Lifestyle.Scoped);
         }
 
         private void SetupGraphQL(Container container)
@@ -196,6 +198,16 @@ namespace FlightKit.DataAccess.Api
             container.RegisterConditional(typeof(IDbRepository<>), typeof(FlightKitDbRepository<>),
                 Lifestyle.Scoped,
                 config => !config.Handled);
+        }
+
+        private void RegisterFuncFactory<TService, TImpl>(
+            Container container, Lifestyle lifestyle = null)
+            where TService : class
+            where TImpl : class, TService
+        {
+            lifestyle = lifestyle ?? container.Options.DefaultLifestyle;
+            var producer = lifestyle.CreateProducer<TService, TImpl>(container);
+            container.RegisterInstance<Func<TService>>(producer.GetInstance);
         }
 
         private void AllowResolvingFuncFactories(ContainerOptions options)

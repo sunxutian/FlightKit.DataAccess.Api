@@ -10,4 +10,9 @@ namespace FlightKit.DataAccess.Domain.Data
     {
         
     }
+
+    public interface IFlightKitEntityWithReportId : IFlightKitEntity
+    {
+        Guid ReportIdentifier { get; set; }
+    }
 }

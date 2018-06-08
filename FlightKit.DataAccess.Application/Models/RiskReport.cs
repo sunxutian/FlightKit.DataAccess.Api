@@ -12,7 +12,6 @@ namespace FlightKit.DataAccess.Application.Models
             Exposures = new HashSet<RiskExposure>();
             FireDivisionRisks = new HashSet<RiskFireDivisionRisk>();
             FloorsAndRoofs = new HashSet<RiskFloorsAndRoof>();
-            InternalProtections = new HashSet<RiskInternalProtection>();
             Occupants = new HashSet<RiskOccupant>();
             ProtectionSafeguards = new HashSet<RiskProtectionSafeguard>();
             ReportAddresses = new HashSet<RiskReportAddress>();
@@ -22,7 +21,6 @@ namespace FlightKit.DataAccess.Application.Models
             ReportPhotoes = new HashSet<RiskReportPhoto>();
             ReportRelatedDates = new HashSet<RiskReportRelatedDate>();
             RetiredOccupantNumbers = new HashSet<RiskRetiredOccupantNumber>();
-            SecondaryConstructions = new HashSet<RiskSecondaryConstruction>();
             Walls = new HashSet<RiskWall>();
         }
 
@@ -117,7 +115,7 @@ namespace FlightKit.DataAccess.Application.Models
         public ICollection<RiskExposure> Exposures { get; set; }
         public ICollection<RiskFireDivisionRisk> FireDivisionRisks { get; set; }
         public ICollection<RiskFloorsAndRoof> FloorsAndRoofs { get; set; }
-        public ICollection<RiskInternalProtection> InternalProtections { get; set; }
+        public RiskInternalProtection InternalProtection { get; set; }
         public ICollection<RiskOccupant> Occupants { get; set; }
         public ICollection<RiskProtectionSafeguard> ProtectionSafeguards { get; set; }
         public ICollection<RiskReportAddress> ReportAddresses { get; set; }
@@ -127,7 +125,7 @@ namespace FlightKit.DataAccess.Application.Models
         public ICollection<RiskReportPhoto> ReportPhotoes { get; set; }
         public ICollection<RiskReportRelatedDate> ReportRelatedDates { get; set; }
         public ICollection<RiskRetiredOccupantNumber> RetiredOccupantNumbers { get; set; }
-        public ICollection<RiskSecondaryConstruction> SecondaryConstructions { get; set; }
+        public RiskSecondaryConstruction SecondaryConstruction { get; set; }
         public ICollection<RiskWall> Walls { get; set; }
     }
 }

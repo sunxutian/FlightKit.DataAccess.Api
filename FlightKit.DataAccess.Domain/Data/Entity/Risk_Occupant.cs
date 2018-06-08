@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace FlightKit.DataAccess.Domain.Data.Entity
 {
-    public partial class Risk_Occupant : IFlightKitEntity
+    public partial class Risk_Occupant : IFlightKitEntityWithReportId
     {
         public Risk_Occupant()
         {

@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 namespace FlightKit.DataAccess.Domain.Data.Entity
 {
-    public partial class Risk_Wall : IFlightKitEntity
+    public partial class Risk_Wall : IFlightKitEntityWithReportId
     {
         public Guid WallIdentifier { get; set; }
         public Guid ReportIdentifier { get; set; }

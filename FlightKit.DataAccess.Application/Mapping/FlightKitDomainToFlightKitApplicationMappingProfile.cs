@@ -42,7 +42,7 @@ namespace FlightKit.DataAccess.Application.Mapping
                 .ForMember(r => r.Exposures, config => config.Ignore())
                 .ForMember(r => r.FireDivisionRisks, config => config.Ignore())
                 .ForMember(r => r.FloorsAndRoofs, config => config.Ignore())
-                .ForMember(r => r.InternalProtections, config => config.Ignore())
+                .ForMember(r => r.InternalProtection, config => config.Ignore())
                 .ForMember(r => r.Occupants, config => config.Ignore())
                 .ForMember(r => r.ProtectionSafeguards, config => config.Ignore())
                 .ForMember(r => r.ReportAddresses, config => config.Ignore())
@@ -52,9 +52,26 @@ namespace FlightKit.DataAccess.Application.Mapping
                 .ForMember(r => r.ReportPhotoes, config => config.Ignore())
                 .ForMember(r => r.ReportRelatedDates, config => config.Ignore())
                 .ForMember(r => r.RetiredOccupantNumbers, config => config.Ignore())
-                .ForMember(r => r.SecondaryConstructions, config => config.Ignore())
+                .ForMember(r => r.SecondaryConstruction, config => config.Ignore())
                 .ForMember(r => r.Walls, config => config.Ignore())
-                .ReverseMap();
+                .ReverseMap()
+                .ForMember(r => r.InternalProtections,
+                    config => config.ResolveUsing((dto, entity, member, context) =>
+                    {
+                        Risk_InternalProtection internalProtection = context.Mapper
+                            .Map<Risk_InternalProtection>(dto.InternalProtection);
+
+                        return new List<Risk_InternalProtection> { internalProtection };
+                    }))
+                .ForMember(r => r.SecondaryConstructions,
+                   config => config.ResolveUsing((dto, entity, member, context) =>
+                   {
+                       Risk_SecondaryConstruction secondaryConstruction = context.Mapper
+                        .Map<Risk_SecondaryConstruction>(dto.SecondaryConstruction);
+
+                       return new List<Risk_SecondaryConstruction> { secondaryConstruction };
+                   }));
+
         }
     }
 }

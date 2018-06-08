@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace FlightKit.DataAccess.Domain.Data.Entity
 {
-    public partial class Risk_ProtectionSafeguard : IFlightKitEntity
+    public partial class Risk_ProtectionSafeguard : IFlightKitEntityWithReportId
     {
         public Guid ProtectionSafeguardIdentifier { get; set; }
         public Guid ReportIdentifier { get; set; }
