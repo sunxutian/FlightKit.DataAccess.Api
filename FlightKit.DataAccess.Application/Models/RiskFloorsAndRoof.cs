@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace FlightKit.DataAccess.Application.Models
 {
-    public partial class RiskFloorsAndRoof
+    public partial class RiskFloorsAndRoof : IFlightDtoWithReportId, IDtoWithSyncMetadata<RiskSyncMetadata>
     {
         public Guid FloorAndRoofIdentifier { get; set; }
         public Guid ReportIdentifier { get; set; }
@@ -43,5 +43,7 @@ namespace FlightKit.DataAccess.Application.Models
         public bool IsAreaCalc { get; set; }
         public short? YearOfRoofCover { get; set; }
         public bool? IsYearOfRoofCoverApproximate { get; set; }
+        public RiskSyncMetadata RiskSyncMetadata { get; set; }
+
     }
 }

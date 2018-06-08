@@ -9,6 +9,7 @@ namespace FlightKit.DataAccess.Core.GraphQL.Types
         public RiskReportRelatedDateType() : base()
         {
             Field(r => r.ReportDateTypeCode, type: typeof(RiskReportDateTypeCodeType));
+            Field<RiskSyncMetadataType>("syncMetadata", resolve: context => context.Source.RiskSyncMetadata);
         }
     }
 }

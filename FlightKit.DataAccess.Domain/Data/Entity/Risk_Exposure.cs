@@ -3,7 +3,8 @@ using System.Collections.Generic;
 
 namespace FlightKit.DataAccess.Domain.Data.Entity
 {
-    public partial class Risk_Exposure : IFlightKitEntityWithReportId
+    [Helpers.TableName("Risks", "Exposures")]
+    public partial class Risk_Exposure : IFlightKitEntityWithReportId, IEntityWithSyncMetadata<Risk_SyncMetadata>
     {
         public Guid ExposureIdentifier { get; set; }
         public Guid ReportIdentifier { get; set; }
@@ -26,5 +27,7 @@ namespace FlightKit.DataAccess.Domain.Data.Entity
         public bool? IsPartyWall { get; set; }
 
         public Risk_Report Report { get; set; }
+        public Risk_SyncMetadata RiskSyncMetadata { get; set; }
+
     }
 }

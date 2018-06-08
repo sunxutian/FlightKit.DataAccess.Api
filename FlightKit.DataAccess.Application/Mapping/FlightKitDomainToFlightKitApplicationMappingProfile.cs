@@ -13,29 +13,72 @@ namespace FlightKit.DataAccess.Application.Mapping
     {
         public FlightKitDomainToFlightKitApplicationMappingProfile()
         {
-            CreateMap<Risk_AdditionDate, RiskAdditionDate>(MemberList.Destination).ReverseMap();
-            CreateMap<Risk_Comment, RiskComment>(MemberList.Destination);
-            CreateMap<Risk_CommentSegment, RiskCommentSegment>(MemberList.Destination).ReverseMap();
+            CreateMap<Risk_AdditionDate, RiskAdditionDate>(MemberList.Destination)
+                .ForMember(_ => _.RiskSyncMetadata, config => config.Ignore())
+                .ReverseMap();
+            CreateMap<Risk_Comment, RiskComment>(MemberList.Destination)
+                .ForMember(_ => _.RiskSyncMetadata, config => config.Ignore())
+                .ReverseMap();
+            CreateMap<Risk_CommentSegment, RiskCommentSegment>(MemberList.Destination)
+                .ForMember(_ => _.RiskSyncMetadata, config => config.Ignore())
+                .ReverseMap();
             CreateMap<Risk_ConstructionTypeCode, RiskConstructionTypeCode>(MemberList.Destination).ReverseMap();
-            CreateMap<Risk_Exposure, RiskExposure>(MemberList.Destination).ReverseMap();
-            CreateMap<Risk_FireDivisionRisk, RiskFireDivisionRisk>(MemberList.Destination).ReverseMap();
-            CreateMap<Risk_FloorsAndRoof, RiskFloorsAndRoof>(MemberList.Destination).ReverseMap();
-            CreateMap<Risk_InternalProtection, RiskInternalProtection>(MemberList.Destination).ReverseMap();
-            CreateMap<Risk_Occupant, RiskOccupant>(MemberList.Destination).ReverseMap();
-            CreateMap<Risk_OccupantHazard, RiskOccupantHazard>(MemberList.Destination).ReverseMap();
-            CreateMap<Risk_OccupantLevel, RiskOccupantLevel>(MemberList.Destination).ReverseMap();
-            CreateMap<Risk_ProtectionSafeguard, RiskProtectionSafeguard>(MemberList.Destination).ReverseMap();
+            CreateMap<Risk_Exposure, RiskExposure>(MemberList.Destination)
+                .ForMember(_ => _.RiskSyncMetadata, config => config.Ignore())
+                .ReverseMap();
+            CreateMap<Risk_FireDivisionRisk, RiskFireDivisionRisk>(MemberList.Destination)
+                .ForMember(_ => _.RiskSyncMetadata, config => config.Ignore())
+                .ReverseMap();
+            CreateMap<Risk_FloorsAndRoof, RiskFloorsAndRoof>(MemberList.Destination)
+                .ForMember(_ => _.RiskSyncMetadata, config => config.Ignore())
+                .ReverseMap();
+            CreateMap<Risk_InternalProtection, RiskInternalProtection>(MemberList.Destination)
+                .ForMember(_ => _.RiskSyncMetadata, config => config.Ignore())
+                .ReverseMap();
+            CreateMap<Risk_Occupant, RiskOccupant>(MemberList.Destination)
+                .ForMember(_ => _.RiskSyncMetadata, config => config.Ignore())
+                .ReverseMap();
+            CreateMap<Risk_OccupantHazard, RiskOccupantHazard>(MemberList.Destination)
+                .ForMember(_ => _.RiskSyncMetadata, config => config.Ignore())
+                .ReverseMap();
+            CreateMap<Risk_OccupantLevel, RiskOccupantLevel>(MemberList.Destination)
+                .ForMember(_ => _.RiskSyncMetadata, config => config.Ignore())
+                .ReverseMap();
+            CreateMap<Risk_ProtectionSafeguard, RiskProtectionSafeguard>(MemberList.Destination)
+                .ForMember(_ => _.RiskSyncMetadata, config => config.Ignore())
+                .ReverseMap();
             CreateMap<Risk_ProtectionSafeguardCode, RiskProtectionSafeguardCode>(MemberList.Destination).ReverseMap();
-            CreateMap<Risk_ReportAddress, RiskReportAddress>(MemberList.Destination).ReverseMap();
-            CreateMap<Risk_ReportAttachment, RiskReportAttachment>(MemberList.Destination).ReverseMap();
-            CreateMap<Risk_ReportBuildingInformation, RiskReportBuildingInformation>(MemberList.Destination).ReverseMap();
+            CreateMap<Risk_ReportAddress, RiskReportAddress>(MemberList.Destination)
+                .ForMember(_ => _.RiskSyncMetadata, config => config.Ignore())
+                .ReverseMap();
+            CreateMap<Risk_ReportAttachment, RiskReportAttachment>(MemberList.Destination)
+                .ForMember(_ => _.RiskSyncMetadata, config => config.Ignore())
+                .ReverseMap();
+            CreateMap<Risk_ReportBuildingInformation, RiskReportBuildingInformation>(MemberList.Destination)
+                .ForMember(_ => _.RiskSyncMetadata, config => config.Ignore())
+                .ReverseMap();
             CreateMap<Risk_ReportDateTypeCode, RiskReportDateTypeCode>(MemberList.Destination).ReverseMap();
-            CreateMap<Risk_ReportHazard, RiskReportHazard>(MemberList.Destination).ReverseMap();
-            CreateMap<Risk_ReportPhoto, RiskReportPhoto>(MemberList.Destination).ReverseMap();
-            CreateMap<Risk_ReportRelatedDate, RiskReportRelatedDate>(MemberList.Destination).ReverseMap();
-            CreateMap<Risk_RetiredOccupantNumber, RiskRetiredOccupantNumber>(MemberList.Destination).ReverseMap();
-            CreateMap<Risk_SecondaryConstruction, RiskSecondaryConstruction>(MemberList.Destination).ReverseMap();
-            CreateMap<Risk_Wall, RiskWall>(MemberList.Destination).ReverseMap();
+            CreateMap<Risk_ReportHazard, RiskReportHazard>(MemberList.Destination)
+                .ForMember(_ => _.RiskSyncMetadata, config => config.Ignore())
+                .ReverseMap();
+            CreateMap<Risk_ReportPhoto, RiskReportPhoto>(MemberList.Destination)
+                .ForMember(_ => _.RiskSyncMetadata, config => config.Ignore())
+                .ReverseMap();
+            CreateMap<Risk_ReportRelatedDate, RiskReportRelatedDate>(MemberList.Destination)
+                .ForMember(_ => _.RiskSyncMetadata, config => config.Ignore())
+                .ReverseMap();
+            CreateMap<Risk_RetiredOccupantNumber, RiskRetiredOccupantNumber>(MemberList.Destination)
+                .ForMember(_ => _.RiskSyncMetadata, config => config.Ignore())
+                .ReverseMap();
+            CreateMap<Risk_SecondaryConstruction, RiskSecondaryConstruction>(MemberList.Destination)
+                .ForMember(_ => _.RiskSyncMetadata, config => config.Ignore())
+                .ReverseMap();
+            CreateMap<Risk_Wall, RiskWall>(MemberList.Destination)
+                .ForMember(_ => _.RiskSyncMetadata, config => config.Ignore())
+                .ReverseMap();
+            CreateMap<Risk_SyncMetadata, RiskSyncMetadata>(MemberList.Destination).ReverseMap();
+            CreateMap<Risk_SyncMetadataClient, RiskSyncMetadataClient>(MemberList.Destination).ReverseMap();
+
             CreateMap<Risk_Report, RiskReport>(MemberList.Destination)
                 .ForMember(r => r.AdditionDates, config => config.Ignore())
                 .ForMember(r => r.Comments, config => config.Ignore())
@@ -54,6 +97,7 @@ namespace FlightKit.DataAccess.Application.Mapping
                 .ForMember(r => r.RetiredOccupantNumbers, config => config.Ignore())
                 .ForMember(r => r.SecondaryConstruction, config => config.Ignore())
                 .ForMember(r => r.Walls, config => config.Ignore())
+                .ForMember(_ => _.RiskSyncMetadata, config => config.Ignore())
                 .ReverseMap()
                 .ForMember(r => r.InternalProtections,
                     config => config.ResolveUsing((dto, entity, member, context) =>

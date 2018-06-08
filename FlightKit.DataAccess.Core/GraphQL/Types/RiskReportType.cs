@@ -45,6 +45,8 @@ namespace FlightKit.DataAccess.Core.GraphQL.Types
               resolve: context => context.Source.SecondaryConstruction);
             Field<ListGraphType<RiskWallType>>("riskWalls",
                 resolve: context => context.Source.Walls);
+            Field<RiskSyncMetadataType>("syncMetadata",
+                resolve: context => context.Source.RiskSyncMetadata);
         }
     }
 }

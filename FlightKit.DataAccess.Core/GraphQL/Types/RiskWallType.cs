@@ -8,6 +8,7 @@ namespace FlightKit.DataAccess.Core.GraphQL.Types
         public RiskWallType() : base()
         {
             Field(r => r.ConstructionTypeCode, type: typeof(RiskConstructionTypeCodeType));
+            Field<RiskSyncMetadataType>("syncMetadata", resolve: context => context.Source.RiskSyncMetadata);
         }
     }
 }

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 
 namespace FlightKit.DataAccess.Domain.Data.Entity
 {
+    [Helpers.TableName("Risks", "ConstructionTypeCodes")]
     public partial class Risk_ConstructionTypeCode : IFlightKitEntity
     {
         public Risk_ConstructionTypeCode()

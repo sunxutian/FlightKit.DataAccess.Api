@@ -3,6 +3,7 @@ using System.Collections.Generic;
 
 namespace FlightKit.DataAccess.Domain.Data.Entity
 {
+    [Helpers.TableName("Risks", "ReportDateTypeCodes")]
     public partial class Risk_ReportDateTypeCode : IFlightKitEntity
     {
         public Risk_ReportDateTypeCode()

@@ -1063,6 +1063,54 @@ namespace FlightKit.DataAccess.Domain
                     .HasConstraintName("Reports_Walls_FK");
             });
 
+            modelBuilder.Entity<Risk_SyncMetadata>(entity =>
+            {
+                entity.HasKey(e => e.CorrelationId);
+
+                entity.ToTable("SyncMetadata", "Risks");
+
+                entity.HasIndex(e => new { e.SyncTable, e.BigIntId, e.CorrelationId })
+                    .HasName("SyncMetadata_ix02")
+                    .IsUnique();
+
+                entity.HasIndex(e => new { e.SyncTable, e.GuidId, e.CorrelationId })
+                    .HasName("SyncMetadata_ix01")
+                    .IsUnique();
+
+                entity.HasIndex(e => new { e.SyncTable, e.StringId, e.CorrelationId })
+                    .HasName("SyncMetadata_ix03")
+                    .IsUnique();
+
+                entity.Property(e => e.CorrelationId).ValueGeneratedNever();
+
+                entity.Property(e => e.StringId).HasMaxLength(150);
+
+                entity.Property(e => e.SyncTable)
+                    .IsRequired()
+                    .HasMaxLength(128)
+                    .IsUnicode(false);
+            });
+
+            modelBuilder.Entity<Risk_SyncMetadataClient>(entity =>
+            {
+                entity.HasKey(e => e.SyncMetadataClientId)
+                    .ForSqlServerIsClustered(false);
+
+                entity.ToTable("SyncMetadataClient", "Risks");
+
+                entity.HasIndex(e => new { e.ClientId, e.SyncTable })
+                    .HasName("SyncMetadataClient_ix00")
+                    .IsUnique()
+                    .ForSqlServerIsClustered();
+
+                entity.Property(e => e.SyncMetadataClientId).ValueGeneratedNever();
+
+                entity.Property(e => e.SyncTable)
+                    .IsRequired()
+                    .HasMaxLength(128)
+                    .IsUnicode(false);
+            });
+
             OnModelCreatingPartial(modelBuilder);
         }
 

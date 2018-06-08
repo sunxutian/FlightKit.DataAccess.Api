@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace FlightKit.DataAccess.Application.Models
 {
-    public partial class RiskInternalProtection
+    public partial class RiskInternalProtection : IFlightDtoWithReportId, IDtoWithSyncMetadata<RiskSyncMetadata>
     {
         public Guid InternalProtectionIdentifier { get; set; }
         public Guid ReportIdentifier { get; set; }
@@ -30,5 +30,7 @@ namespace FlightKit.DataAccess.Application.Models
         public bool? IsRecieverListed { get; set; }
         public string Comment { get; set; }
         public bool HasNonStandardRetransmission { get; set; }
+        public RiskSyncMetadata RiskSyncMetadata { get; set; }
+
     }
 }

@@ -14,6 +14,7 @@ namespace FlightKit.DataAccess.Core.GraphQL.Types
     {
         public RiskExposureType() : base()
         {
+            Field<RiskSyncMetadataType>("syncMetadata", resolve: context => context.Source.RiskSyncMetadata);
         }
     }
 }

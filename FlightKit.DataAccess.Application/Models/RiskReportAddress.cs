@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace FlightKit.DataAccess.Application.Models
 {
-    public partial class RiskReportAddress
+    public partial class RiskReportAddress : IFlightDtoWithReportId, IDtoWithSyncMetadata<RiskSyncMetadata>
     {
         public Guid ReportAddressIdentifier { get; set; }
         public Guid ReportIdentifier { get; set; }
@@ -25,5 +25,7 @@ namespace FlightKit.DataAccess.Application.Models
         public string FireProtectionArea { get; set; }
         public string CommunityName { get; set; }
         public bool IsAlias { get; set; }
+        public RiskSyncMetadata RiskSyncMetadata { get; set; }
+
     }
 }

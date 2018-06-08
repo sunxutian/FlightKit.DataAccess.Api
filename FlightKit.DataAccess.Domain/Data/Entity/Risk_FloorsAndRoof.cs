@@ -3,7 +3,8 @@ using System.Collections.Generic;
 
 namespace FlightKit.DataAccess.Domain.Data.Entity
 {
-    public partial class Risk_FloorsAndRoof : IFlightKitEntityWithReportId
+    [Helpers.TableName("Risks", "FloorsAndRoofs")]
+    public partial class Risk_FloorsAndRoof : IFlightKitEntityWithReportId, IEntityWithSyncMetadata<Risk_SyncMetadata>
     {
         public Guid FloorAndRoofIdentifier { get; set; }
         public Guid ReportIdentifier { get; set; }
@@ -45,5 +46,7 @@ namespace FlightKit.DataAccess.Domain.Data.Entity
         public bool? IsYearOfRoofCoverApproximate { get; set; }
 
         public Risk_Report Report { get; set; }
+        public Risk_SyncMetadata RiskSyncMetadata { get; set; }
+
     }
 }

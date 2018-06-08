@@ -10,12 +10,7 @@ namespace FlightKit.DataAccess.Core.GraphQL.Types
         {
             Field(o => o.OccupantHazards, type: typeof(ListGraphType<RiskOccupantHazardType>));
             Field(o => o.OccupantLevels, type: typeof(ListGraphType<RiskOccupantLevelType>));
-
-            //Field<ListGraphType<RiskOccupantHazardType>>("occupantHazards", 
-            //    resolve: context => context.Source.OccupantHazards);
-
-            //Field<ListGraphType<RiskOccupantLevelType>>("occupantLevels",
-            //    resolve: context => context.Source.OccupantLevels);
+            Field<RiskSyncMetadataType>("syncMetadata", resolve: context => context.Source.RiskSyncMetadata);
         }
     }
 }

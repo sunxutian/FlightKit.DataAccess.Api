@@ -31,7 +31,6 @@ namespace FlightKit.DataAccess.Core.GraphQL.Types
 
             var idProperties = typeof(TApplication).GetProperties().Where(p => p.PropertyType == typeof(Guid) || p.PropertyType == typeof(Guid?));
 
-
             foreach (var idProperty in idProperties)
             {
                 var (underlineType, isNullable) = IfNullableType(idProperty.PropertyType);
