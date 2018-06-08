@@ -107,7 +107,7 @@ namespace FlightKit.DataAccess.Domain.Data.Entity
         public short? ColumnWallThickness { get; set; }
         public bool? IsCc4 { get; set; }
         public string FileNumber { get; set; }
-        public string DeleteComment { get; set; }
+        public string DeleteReasonCode { get; set; }
         public bool? HasInaccessibleArea { get; set; }
         public string InaccessibleAreaComment { get; set; }
         public bool? IsSprinklerNotUpdated { get; set; }

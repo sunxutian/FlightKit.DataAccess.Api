@@ -581,8 +581,8 @@ namespace FlightKit.DataAccess.Domain
                     .HasMaxLength(10)
                     .IsUnicode(false);
 
-                entity.Property(e => e.DeleteComment)
-                    .HasMaxLength(500)
+                entity.Property(e => e.DeleteReasonCode)
+                    .HasMaxLength(4)
                     .IsUnicode(false);
 
                 entity.Property(e => e.EscortedByName)

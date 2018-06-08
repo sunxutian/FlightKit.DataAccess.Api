@@ -47,6 +47,11 @@ namespace FlightKit.DataAccess.Core.GraphQL.Types
                 return (t.GetGenericArguments()[0], true);
             }
 
+            if(t == typeof(string))
+            {
+                return (t, true);
+            }
+
             return (t, false);
         }
     }
