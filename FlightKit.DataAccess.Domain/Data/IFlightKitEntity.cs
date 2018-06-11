@@ -1,15 +1,13 @@
 ﻿using FlightKit.DataAccess.Domain.Data.Entity;
+using FlightKit.DataAccess.Domain.Helpers;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Reflection;
 
 namespace FlightKit.DataAccess.Domain.Data
 {
     public interface IFlightKitEntity
     {
-        
+
     }
 
     public interface IEntityWithSyncMetadata<TSyncMetadata> : IFlightKitEntity
@@ -21,5 +19,10 @@ namespace FlightKit.DataAccess.Domain.Data
     public interface IFlightKitEntityWithReportId : IFlightKitEntity
     {
         Guid ReportIdentifier { get; set; }
+    }
+
+    public abstract class RiskEntityWithSyncMetadata : IEntityWithSyncMetadata<Risk_SyncMetadata>
+    {
+        public Risk_SyncMetadata RiskSyncMetadata { get; set; }
     }
 }

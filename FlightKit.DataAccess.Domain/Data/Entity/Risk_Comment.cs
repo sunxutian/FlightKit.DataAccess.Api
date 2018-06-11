@@ -4,7 +4,7 @@ using System.Collections.Generic;
 namespace FlightKit.DataAccess.Domain.Data.Entity
 {
     [Helpers.TableName("Risks", "Comments")]
-    public partial class Risk_Comment : IFlightKitEntityWithReportId, IEntityWithSyncMetadata<Risk_SyncMetadata>
+    public partial class Risk_Comment : RiskEntityWithSyncMetadata, IFlightKitEntityWithReportId
     {
         public Risk_Comment()
         {
@@ -19,7 +19,5 @@ namespace FlightKit.DataAccess.Domain.Data.Entity
 
         public Risk_Report Report { get; set; }
         public ICollection<Risk_CommentSegment> CommentSegments { get; set; }
-        public Risk_SyncMetadata RiskSyncMetadata { get; set; }
-
     }
 }

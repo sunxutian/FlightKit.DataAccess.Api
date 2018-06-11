@@ -12,6 +12,7 @@ namespace FlightKit.DataAccess.Domain.Repo
     /// </summary>
     /// <typeparam name="TEntity">The type of the entity.</typeparam>
     public interface IDbRepository<TEntity>
+        where TEntity: class, new()
     {
         /// <summary>
         /// Gets entity from db with filter

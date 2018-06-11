@@ -37,5 +37,13 @@ namespace FlightKit.DataAccess.Core.Services.Impl
             var result = await repo.QueryBy(predicate).ProjectTo<T>(mapper.ConfigurationProvider).ToListAsync().ConfigureAwait(false);
             return result;
         }
+
+        public async Task<List<TDto>> MapQueryable<TSource, TDto>(IQueryable<TSource> sourceQueryable, bool includesSyncMetadata = false)
+        {
+            IMapper mapper = includesSyncMetadata ? _mapperWithSyncMetadata : _mapperwithoutSyncMetadata;
+            var result = await sourceQueryable.ProjectTo<TDto>(mapper.ConfigurationProvider).ToListAsync().ConfigureAwait(false);
+
+            return result;
+        }
     }
 }

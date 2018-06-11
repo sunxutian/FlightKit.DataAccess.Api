@@ -4,7 +4,7 @@ using System.Collections.Generic;
 namespace FlightKit.DataAccess.Domain.Data.Entity
 {
     [Helpers.TableName("Risks", "Occupants")]
-    public partial class Risk_Occupant : IFlightKitEntityWithReportId, IEntityWithSyncMetadata<Risk_SyncMetadata>
+    public partial class Risk_Occupant : RiskEntityWithSyncMetadata, IFlightKitEntityWithReportId
     {
         public Risk_Occupant()
         {
@@ -32,7 +32,5 @@ namespace FlightKit.DataAccess.Domain.Data.Entity
         public Risk_Report Report { get; set; }
         public ICollection<Risk_OccupantHazard> OccupantHazards { get; set; }
         public ICollection<Risk_OccupantLevel> OccupantLevels { get; set; }
-        public Risk_SyncMetadata RiskSyncMetadata { get; set; }
-
     }
 }

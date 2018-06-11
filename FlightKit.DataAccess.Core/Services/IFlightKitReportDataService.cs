@@ -1,4 +1,6 @@
 ﻿using FlightKit.DataAccess.Application.Models;
+using FlightKit.DataAccess.Domain.Data;
+using FlightKit.DataAccess.Domain.Data.Entity;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,7 +15,13 @@ namespace FlightKit.DataAccess.Core.Services
         Task<RiskReport> GetRiskReportByReportIdAsync(Guid reportId, bool includesSyncMetadata = false);
         Task<ICollection<RiskReport>> GetRiskReportsByRiskIdAsync(string riskId, bool includesSyncMetadata = false);
         Task<ICollection<RiskReport>> GetRiskReportsByOrderIdAsync(long orderId, bool includesSyncMetadata = false);
-        Task<ICollection<TDtoWithSyncMetadata>> GetRiskDataWithSyncMetadataByReportIdAsync<TDtoWithSyncMetadata>(Guid reportId)
-            where TDtoWithSyncMetadata : IDtoWithSyncMetadata<RiskSyncMetadata>;
+        Task<ICollection<TDtoWithSyncMetadata>> GetRiskDataWithSyncMetadataByReportIdAsync<TEntity, TDtoWithSyncMetadata>(Expression<Func<Risk_Report, bool>> filter,
+            Expression<Func<Risk_Report, IEnumerable<TEntity>>> getDataExp)
+            where TDtoWithSyncMetadata : RiskDtoWithSyncMetadata
+            where TEntity : IEntityWithSyncMetadata<Risk_SyncMetadata>;
+        Task<ICollection<TDtoWithSyncMetadata>> GetRiskDataWithSyncMetadataByReportIdAsync<TEntity, TDtoWithSyncMetadata>(Expression<Func<Risk_Report, bool>> filter,
+            Expression<Func<Risk_Report, TEntity>> getDataExp)
+            where TDtoWithSyncMetadata : RiskDtoWithSyncMetadata
+            where TEntity : IEntityWithSyncMetadata<Risk_SyncMetadata>;
     }
 }

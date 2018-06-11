@@ -4,7 +4,7 @@ using System.Collections.Generic;
 namespace FlightKit.DataAccess.Domain.Data.Entity
 {
     [Helpers.TableName("Risks", "SecondaryConstructions")]
-    public partial class Risk_SecondaryConstruction : IFlightKitEntityWithReportId, IEntityWithSyncMetadata<Risk_SyncMetadata>
+    public partial class Risk_SecondaryConstruction : RiskEntityWithSyncMetadata, IFlightKitEntityWithReportId
     {
         public Guid SecondaryConstructionIdentifier { get; set; }
         public Guid ReportIdentifier { get; set; }
@@ -44,7 +44,5 @@ namespace FlightKit.DataAccess.Domain.Data.Entity
         public int? TotalEffectiveArea { get; set; }
 
         public Risk_Report Report { get; set; }
-        public Risk_SyncMetadata RiskSyncMetadata { get; set; }
-
     }
 }

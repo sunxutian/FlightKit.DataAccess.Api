@@ -737,8 +737,8 @@ namespace FlightKit.DataAccess.Domain
 
                 entity.HasOne(d => d.RiskSyncMetadata)
                     .WithOne()
-                    .HasPrincipalKey<Risk_Report>(a => a.ReportIdentifier)
-                    .HasForeignKey<Risk_SyncMetadata>(s => s.GuidId)
+                    .HasPrincipalKey<Risk_Report>(nameof(Risk_Report.ReportIdentifier))
+                    .HasForeignKey<Risk_SyncMetadata>(nameof(Risk_SyncMetadata.GuidId))
                     .IsRequired(false);
             });
 
@@ -835,8 +835,8 @@ namespace FlightKit.DataAccess.Domain
 
                 entity.HasOne(d => d.RiskSyncMetadata)
                     .WithOne()
-                    .HasPrincipalKey<Risk_ReportAddress>(a => a.ReportAddressIdentifier)
-                    .HasForeignKey<Risk_SyncMetadata>(s => s.GuidId)
+                    .HasPrincipalKey<Risk_ReportAddress>(nameof(Risk_ReportAddress.ReportAddressIdentifier))
+                    .HasForeignKey<Risk_SyncMetadata>(nameof(Risk_SyncMetadata.GuidId))
                     .IsRequired(false);
             });
 

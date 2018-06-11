@@ -4,7 +4,7 @@ using System.Collections.Generic;
 namespace FlightKit.DataAccess.Domain.Data.Entity
 {
     [Helpers.TableName("Risks", "ReportAttachments")]
-    public partial class Risk_ReportAttachment : IFlightKitEntityWithReportId, IEntityWithSyncMetadata<Risk_SyncMetadata>
+    public partial class Risk_ReportAttachment : RiskEntityWithSyncMetadata, IFlightKitEntityWithReportId
     {
         public Guid ReportAttachmentIdentifier { get; set; }
         public Guid ReportIdentifier { get; set; }
@@ -16,7 +16,5 @@ namespace FlightKit.DataAccess.Domain.Data.Entity
         public string FileName { get; set; }
 
         public Risk_Report Report { get; set; }
-        public Risk_SyncMetadata RiskSyncMetadata { get; set; }
-
     }
 }

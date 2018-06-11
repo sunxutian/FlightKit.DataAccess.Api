@@ -4,7 +4,7 @@ using System.Collections.Generic;
 namespace FlightKit.DataAccess.Domain.Data.Entity
 {
     [Helpers.TableName("Risks", "ReportAddresses")]
-    public partial class Risk_ReportAddress : IFlightKitEntityWithReportId, IEntityWithSyncMetadata<Risk_SyncMetadata>
+    public partial class Risk_ReportAddress : RiskEntityWithSyncMetadata, IFlightKitEntityWithReportId
     {
         public Guid ReportAddressIdentifier { get; set; }
         public Guid ReportIdentifier { get; set; }
@@ -28,7 +28,5 @@ namespace FlightKit.DataAccess.Domain.Data.Entity
         public bool IsAlias { get; set; }
 
         public Risk_Report Report { get; set; }
-        public Risk_SyncMetadata RiskSyncMetadata { get; set; }
-
     }
 }

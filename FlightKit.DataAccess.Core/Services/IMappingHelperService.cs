@@ -22,7 +22,7 @@ namespace FlightKit.DataAccess.Core.Services
         /// <param name="predicate">filter to get entity from db</param>
         /// <param name="includesSyncMetadata">if set to <c>true</c> [includes synchronize metadata].</param>
         /// <returns>
-        /// mapped application object of domain entity
+        /// mapped application object of domain entity via querying db
         /// </returns>
         Task<List<T>> GetMappedDtoFromDbAsync<TDomain, T>(IDbRepository<TDomain> repo, Expression<Func<TDomain, bool>> predicate, bool includesSyncMetadata = false)
             where TDomain : class, new();
@@ -34,5 +34,15 @@ namespace FlightKit.DataAccess.Core.Services
         /// <param name="source">The source.</param>
         /// <returns>mapped target object</returns>
         TTarget Map<TTarget>(object source);
+
+        /// <summary>
+        /// Maps the queryable.
+        /// </summary>
+        /// <typeparam name="TSource">The type of the source.</typeparam>
+        /// <typeparam name="TDto">The type of the dto.</typeparam>
+        /// <param name="sourceQueryable">The source queryable.</param>
+        /// <param name="includesSyncMetadata">if set to <c>true</c> [includes synchronize metadata].</param>
+        /// <returns>map queryable to dto via querying db</returns>
+        Task<List<TDto>> MapQueryable<TSource, TDto>(IQueryable<TSource> sourceQueryable, bool includesSyncMetadata = false);
     }
 }

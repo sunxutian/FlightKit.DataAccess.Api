@@ -214,13 +214,6 @@ namespace FlightKit.DataAccess.Api
             container.RegisterConditional(typeof(IDbRepository<>), typeof(FlightKitDbRepository<>),
                 Lifestyle.Scoped,
                 config => !config.Handled);
-
-            container.Collection.Register(typeof(IDbRepository<>), 
-                typeof(Risk_Report).Assembly
-                .ExportedTypes.Where(typeof(IEntityWithSyncMetadata<Risk_SyncMetadata>).IsAssignableFrom)
-                .Select(t => Lifestyle.Scoped
-                .CreateRegistration(typeof(IDbRepository<>).MakeGenericType(t), container))
-                );
         }
 
         private void RegisterFuncFactory<TService, TImpl>(
