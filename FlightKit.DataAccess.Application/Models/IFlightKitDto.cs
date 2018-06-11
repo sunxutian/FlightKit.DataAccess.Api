@@ -21,4 +21,9 @@ namespace FlightKit.DataAccess.Application.Models
     {
         TSyncMetadata RiskSyncMetadata { get; set; }
     }
+
+    public abstract class RiskDtoWithSyncMetadata : IDtoWithSyncMetadata<RiskSyncMetadata>
+    {
+        public RiskSyncMetadata RiskSyncMetadata { get; set; }
+    }
 }

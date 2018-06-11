@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace FlightKit.DataAccess.Application.Models
 {
-    public partial class RiskOccupant : IFlightDtoWithReportId, IDtoWithSyncMetadata<RiskSyncMetadata>
+    public partial class RiskOccupant : RiskDtoWithSyncMetadata, IFlightDtoWithReportId
     {
         public RiskOccupant()
         {
@@ -29,7 +29,5 @@ namespace FlightKit.DataAccess.Application.Models
         public string OccupantComment { get; set; }
         public ICollection<RiskOccupantHazard> OccupantHazards { get; set; }
         public ICollection<RiskOccupantLevel> OccupantLevels { get; set; }
-        public RiskSyncMetadata RiskSyncMetadata { get; set; }
-
     }
 }

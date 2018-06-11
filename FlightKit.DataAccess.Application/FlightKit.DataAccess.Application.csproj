@@ -5,6 +5,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="Mapping\FlightKitDomainToFlightKitApplicationWithNoSyncMetadataMappingProfile.cs~RF2b794bab.TMP" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="AutoMapper" Version="6.2.2" />
   </ItemGroup>
 

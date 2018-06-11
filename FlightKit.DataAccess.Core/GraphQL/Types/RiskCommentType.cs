@@ -16,7 +16,10 @@ namespace FlightKit.DataAccess.Core.GraphQL.Types
         public RiskCommentType() : base()
         {
             Field(r => r.CommentSegments, type: typeof(ListGraphType<RiskCommentSegmentType>));
-            Field<RiskSyncMetadataType>("syncMetadata", resolve: context => context.Source.RiskSyncMetadata);
+            Field<RiskSyncMetadataType>("syncMetadata",
+                resolve: c => c.Source.RiskSyncMetadata,
+                description: "sync metadata");
+            Interface<FlightKitDtoWithSyncMetadataType>();
         }
     }
 }

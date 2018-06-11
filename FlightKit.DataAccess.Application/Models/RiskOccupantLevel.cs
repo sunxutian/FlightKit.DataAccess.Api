@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace FlightKit.DataAccess.Application.Models
 {
-    public partial class RiskOccupantLevel : IFlightKitDto, IDtoWithSyncMetadata<RiskSyncMetadata>
+    public partial class RiskOccupantLevel : RiskDtoWithSyncMetadata, IFlightKitDto
     {
         public Guid OccupantLevelIdentifier { get; set; }
         public Guid OccupantIdentifier { get; set; }
@@ -16,7 +16,5 @@ namespace FlightKit.DataAccess.Application.Models
         public bool? HasExtinguisher { get; set; }
         public bool? HasLimitedSupplyFireProtectionSystem { get; set; }
         public string LimitedSupplyFireProtectionSystemComment { get; set; }
-        public RiskSyncMetadata RiskSyncMetadata { get; set; }
-
     }
 }

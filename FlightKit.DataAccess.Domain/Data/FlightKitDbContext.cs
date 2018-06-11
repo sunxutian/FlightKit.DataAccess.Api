@@ -74,6 +74,12 @@ namespace FlightKit.DataAccess.Domain
                     .HasForeignKey(d => d.ReportIdentifier)
                     .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("Reports_ReportAdditionDates_FK");
+
+                entity.HasOne(d => d.RiskSyncMetadata)
+                    .WithOne()
+                    .HasPrincipalKey<Risk_AdditionDate>(a => a.AdditionDateIdentifier)
+                    .HasForeignKey<Risk_SyncMetadata>(s => s.GuidId)
+                    .IsRequired(false);
             });
 
             modelBuilder.Entity<Risk_Comment>(entity =>
@@ -106,6 +112,12 @@ namespace FlightKit.DataAccess.Domain
                     .HasForeignKey(d => d.ReportIdentifier)
                     .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("Reports_Comments_FK");
+
+                entity.HasOne(d => d.RiskSyncMetadata)
+                    .WithOne()
+                    .HasPrincipalKey<Risk_Comment>(a => a.CommentIdentifier)
+                    .HasForeignKey<Risk_SyncMetadata>(s => s.GuidId)
+                    .IsRequired(false);
             });
 
             modelBuilder.Entity<Risk_CommentSegment>(entity =>
@@ -132,6 +144,12 @@ namespace FlightKit.DataAccess.Domain
                     .HasForeignKey(d => d.CommentIdentifier)
                     .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("Comments_CommentSegments_FK");
+
+                entity.HasOne(d => d.RiskSyncMetadata)
+                    .WithOne()
+                    .HasPrincipalKey<Risk_CommentSegment>(a => a.CommentSegmentIdentifier)
+                    .HasForeignKey<Risk_SyncMetadata>(s => s.GuidId)
+                    .IsRequired(false);
             });
 
             modelBuilder.Entity<Risk_ConstructionTypeCode>(entity =>
@@ -207,6 +225,12 @@ namespace FlightKit.DataAccess.Domain
                     .HasForeignKey(d => d.ReportIdentifier)
                     .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("Reports_Exposures_FK");
+
+                entity.HasOne(d => d.RiskSyncMetadata)
+                    .WithOne()
+                    .HasPrincipalKey<Risk_Exposure>(a => a.ExposureIdentifier)
+                    .HasForeignKey<Risk_SyncMetadata>(s => s.GuidId)
+                    .IsRequired(false);
             });
 
             modelBuilder.Entity<Risk_FireDivisionRisk>(entity =>
@@ -234,6 +258,12 @@ namespace FlightKit.DataAccess.Domain
                     .HasForeignKey(d => d.ReportIdentifier)
                     .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("Reports_FireDivisionRisks_FK");
+
+                entity.HasOne(d => d.RiskSyncMetadata)
+                    .WithOne()
+                    .HasPrincipalKey<Risk_FireDivisionRisk>(a => a.FireDivisionRiskIdentifier)
+                    .HasForeignKey<Risk_SyncMetadata>(s => s.GuidId)
+                    .IsRequired(false);
             });
 
             modelBuilder.Entity<Risk_FloorsAndRoof>(entity =>
@@ -285,6 +315,12 @@ namespace FlightKit.DataAccess.Domain
                     .HasForeignKey(d => d.ReportIdentifier)
                     .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("Reports_FloorsAndRoofs_FK");
+
+                entity.HasOne(d => d.RiskSyncMetadata)
+                    .WithOne()
+                    .HasPrincipalKey<Risk_FloorsAndRoof>(a => a.FloorAndRoofIdentifier)
+                    .HasForeignKey<Risk_SyncMetadata>(s => s.GuidId)
+                    .IsRequired(false);
             });
 
             modelBuilder.Entity<Risk_InternalProtection>(entity =>
@@ -347,6 +383,12 @@ namespace FlightKit.DataAccess.Domain
                     .HasForeignKey(d => d.ReportIdentifier)
                     .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("Reports_InternalProtections_FK");
+
+                entity.HasOne(d => d.RiskSyncMetadata)
+                    .WithOne()
+                    .HasPrincipalKey<Risk_InternalProtection>(a => a.InternalProtectionIdentifier)
+                    .HasForeignKey<Risk_SyncMetadata>(s => s.GuidId)
+                    .IsRequired(false);
             });
 
             modelBuilder.Entity<Risk_Occupant>(entity =>
@@ -395,6 +437,12 @@ namespace FlightKit.DataAccess.Domain
                     .HasForeignKey(d => d.ReportIdentifier)
                     .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("Reports_Occupants_FK");
+
+                entity.HasOne(d => d.RiskSyncMetadata)
+                    .WithOne()
+                    .HasPrincipalKey<Risk_Occupant>(a => a.OccupantIdentifier)
+                    .HasForeignKey<Risk_SyncMetadata>(s => s.GuidId)
+                    .IsRequired(false);
             });
 
             modelBuilder.Entity<Risk_OccupantHazard>(entity =>
@@ -424,6 +472,12 @@ namespace FlightKit.DataAccess.Domain
                     .HasForeignKey(d => d.OccupantIdentifier)
                     .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("Occupants_OccupantHazards_FK");
+
+                entity.HasOne(d => d.RiskSyncMetadata)
+                    .WithOne()
+                    .HasPrincipalKey<Risk_OccupantHazard>(a => a.OccupantHazardIdentifier)
+                    .HasForeignKey<Risk_SyncMetadata>(s => s.GuidId)
+                    .IsRequired(false);
             });
 
             modelBuilder.Entity<Risk_OccupantLevel>(entity =>
@@ -457,6 +511,12 @@ namespace FlightKit.DataAccess.Domain
                     .HasForeignKey(d => d.OccupantIdentifier)
                     .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("Occupants_OccupantLevels_FK");
+
+                entity.HasOne(d => d.RiskSyncMetadata)
+                    .WithOne()
+                    .HasPrincipalKey<Risk_OccupantLevel>(a => a.OccupantLevelIdentifier)
+                    .HasForeignKey<Risk_SyncMetadata>(s => s.GuidId)
+                    .IsRequired(false);
             });
 
             modelBuilder.Entity<Risk_ProtectionSafeguard>(entity =>
@@ -488,6 +548,12 @@ namespace FlightKit.DataAccess.Domain
                     .HasForeignKey(d => d.ReportIdentifier)
                     .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("Reports_ProtectionSafeguardCodeValue_FK");
+
+                entity.HasOne(d => d.RiskSyncMetadata)
+                    .WithOne()
+                    .HasPrincipalKey<Risk_ProtectionSafeguard>(a => a.ProtectionSafeguardIdentifier)
+                    .HasForeignKey<Risk_SyncMetadata>(s => s.GuidId)
+                    .IsRequired(false);
             });
 
             modelBuilder.Entity<Risk_ProtectionSafeguardCode>(entity =>
@@ -668,6 +734,12 @@ namespace FlightKit.DataAccess.Domain
                     .IsUnicode(false);
 
                 entity.Property(e => e.WaterSupplyWorksAdequacy).HasColumnType("decimal(5, 2)");
+
+                entity.HasOne(d => d.RiskSyncMetadata)
+                    .WithOne()
+                    .HasPrincipalKey<Risk_Report>(a => a.ReportIdentifier)
+                    .HasForeignKey<Risk_SyncMetadata>(s => s.GuidId)
+                    .IsRequired(false);
             });
 
             modelBuilder.Entity<Risk_ReportAddress>(entity =>
@@ -760,6 +832,12 @@ namespace FlightKit.DataAccess.Domain
                     .HasForeignKey(d => d.ReportIdentifier)
                     .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("Reports_ReportAddresses_FK");
+
+                entity.HasOne(d => d.RiskSyncMetadata)
+                    .WithOne()
+                    .HasPrincipalKey<Risk_ReportAddress>(a => a.ReportAddressIdentifier)
+                    .HasForeignKey<Risk_SyncMetadata>(s => s.GuidId)
+                    .IsRequired(false);
             });
 
             modelBuilder.Entity<Risk_ReportAttachment>(entity =>
@@ -799,6 +877,12 @@ namespace FlightKit.DataAccess.Domain
                     .HasForeignKey(d => d.ReportIdentifier)
                     .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("Reports_ReportAttachments_FK");
+
+                entity.HasOne(d => d.RiskSyncMetadata)
+                    .WithOne()
+                    .HasPrincipalKey<Risk_ReportAttachment>(a => a.ReportAttachmentIdentifier)
+                    .HasForeignKey<Risk_SyncMetadata>(s => s.GuidId)
+                    .IsRequired(false);
             });
 
             modelBuilder.Entity<Risk_ReportBuildingInformation>(entity =>
@@ -826,6 +910,12 @@ namespace FlightKit.DataAccess.Domain
                     .HasForeignKey(d => d.ReportIdentifier)
                     .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("Reports_ReportBuildingInformation_FK");
+
+                entity.HasOne(d => d.RiskSyncMetadata)
+                    .WithOne()
+                    .HasPrincipalKey<Risk_ReportBuildingInformation>(a => a.ReportBuildingInformationIdentifier)
+                    .HasForeignKey<Risk_SyncMetadata>(s => s.GuidId)
+                    .IsRequired(false);
             });
 
             modelBuilder.Entity<Risk_ReportDateTypeCode>(entity =>
@@ -873,6 +963,12 @@ namespace FlightKit.DataAccess.Domain
                     .HasForeignKey(d => d.ReportIdentifier)
                     .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("Reports_ReportHazards_FK");
+
+                entity.HasOne(d => d.RiskSyncMetadata)
+                    .WithOne()
+                    .HasPrincipalKey<Risk_ReportHazard>(a => a.ReportHazardIdentifier)
+                    .HasForeignKey<Risk_SyncMetadata>(s => s.GuidId)
+                    .IsRequired(false);
             });
 
             modelBuilder.Entity<Risk_ReportPhoto>(entity =>
@@ -904,6 +1000,12 @@ namespace FlightKit.DataAccess.Domain
                     .HasForeignKey(d => d.ReportIdentifier)
                     .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("Reports_ReportPhotos_FK");
+
+                entity.HasOne(d => d.RiskSyncMetadata)
+                    .WithOne()
+                    .HasPrincipalKey<Risk_ReportPhoto>(a => a.ReportPhotoIdentifier)
+                    .HasForeignKey<Risk_SyncMetadata>(s => s.GuidId)
+                    .IsRequired(false);
             });
 
             modelBuilder.Entity<Risk_ReportRelatedDate>(entity =>
@@ -941,6 +1043,12 @@ namespace FlightKit.DataAccess.Domain
                     .HasForeignKey(d => d.ReportIdentifier)
                     .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("Reports_ReportRelatedDates_FK");
+
+                entity.HasOne(d => d.RiskSyncMetadata)
+                    .WithOne()
+                    .HasPrincipalKey<Risk_ReportRelatedDate>(a => a.ReportRelatedDateIdentifier)
+                    .HasForeignKey<Risk_SyncMetadata>(s => s.GuidId)
+                    .IsRequired(false);
             });
 
             modelBuilder.Entity<Risk_RetiredOccupantNumber>(entity =>
@@ -958,6 +1066,12 @@ namespace FlightKit.DataAccess.Domain
                     .HasForeignKey(d => d.ReportIdentifier)
                     .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("RetiredOccupantNumbers_Reports_FK");
+
+                entity.HasOne(d => d.RiskSyncMetadata)
+                    .WithOne()
+                    .HasPrincipalKey<Risk_RetiredOccupantNumber>(a => a.RetiredOccupantNumberIdentifier)
+                    .HasForeignKey<Risk_SyncMetadata>(s => s.GuidId)
+                    .IsRequired(false);
             });
 
             modelBuilder.Entity<Risk_SecondaryConstruction>(entity =>
@@ -1014,6 +1128,12 @@ namespace FlightKit.DataAccess.Domain
                     .HasForeignKey(d => d.ReportIdentifier)
                     .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("Reports_SecondaryConstructions_FK");
+
+                entity.HasOne(d => d.RiskSyncMetadata)
+                    .WithOne()
+                    .HasPrincipalKey<Risk_SecondaryConstruction>(a => a.SecondaryConstructionIdentifier)
+                    .HasForeignKey<Risk_SyncMetadata>(s => s.GuidId)
+                    .IsRequired(false);
             });
 
             modelBuilder.Entity<Risk_Wall>(entity =>
@@ -1061,6 +1181,12 @@ namespace FlightKit.DataAccess.Domain
                     .HasForeignKey(d => d.ReportIdentifier)
                     .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("Reports_Walls_FK");
+
+                entity.HasOne(d => d.RiskSyncMetadata)
+                    .WithOne()
+                    .HasPrincipalKey<Risk_Wall>(a => a.WallIdentifier)
+                    .HasForeignKey<Risk_SyncMetadata>(s => s.GuidId)
+                    .IsRequired(false);
             });
 
             modelBuilder.Entity<Risk_SyncMetadata>(entity =>

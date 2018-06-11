@@ -32,6 +32,9 @@ using FlightKit.DataAccess.Api.GraphQL;
 using FlightKit.DataAccess.Core.Services;
 using FlightKit.DataAccess.Core.Services.Impl;
 using System.Linq.Expressions;
+using FlightKit.DataAccess.Core.Helpers;
+using FlightKit.DataAccess.Domain.Data.Entity;
+using FlightKit.DataAccess.Domain.Data;
 
 namespace FlightKit.DataAccess.Api
 {
@@ -171,18 +174,31 @@ namespace FlightKit.DataAccess.Api
 
         private void SetupAutoMapper(Container container)
         {
-            container.RegisterSingleton<IMapper>(
-                () =>
-                {
-                    var config = new MapperConfiguration(
-                           cfg =>
-                           {
-                               cfg.AddProfile<FlightKitDomainToFlightKitApplicationMappingProfile>();
-                           });
-                    config.AssertConfigurationIsValid();
-                    IMapper mapper = config.CreateMapper(container.GetInstance);
-                    return mapper;
-                });
+            container.RegisterConditional<IMapper>(Lifestyle.Singleton.CreateRegistration(typeof(IMapper), () =>
+            {
+                var config = new MapperConfiguration(
+                       cfg =>
+                       {
+                           cfg.AddProfile<FlightKitDomainToFlightKitApplicationMappingProfile>();
+                       });
+                config.AssertConfigurationIsValid();
+                IMapper mapper = config.CreateMapper(container.GetInstance);
+                return mapper;
+            }, container), 
+            context => context.Consumer?.Target?.GetCustomAttribute<QueryWithSyncMetadataAttribute>() != null);
+
+            container.RegisterConditional<IMapper>(Lifestyle.Singleton.CreateRegistration(typeof(IMapper), () =>
+            {
+                var config = new MapperConfiguration(
+                       cfg =>
+                       {
+                           cfg.AddProfile<FlightKitDomainToFlightKitApplicationWithNoSyncMetadataMappingProfile>();
+                       });
+                config.AssertConfigurationIsValid();
+                IMapper mapper = config.CreateMapper(container.GetInstance);
+                return mapper;
+            }, container),
+            context => context.Consumer?.Target?.GetCustomAttribute<QueryWithSyncMetadataAttribute>() == null);
         }
 
         private void SetupEntityFramework(Container container)
@@ -198,6 +214,13 @@ namespace FlightKit.DataAccess.Api
             container.RegisterConditional(typeof(IDbRepository<>), typeof(FlightKitDbRepository<>),
                 Lifestyle.Scoped,
                 config => !config.Handled);
+
+            container.Collection.Register(typeof(IDbRepository<>), 
+                typeof(Risk_Report).Assembly
+                .ExportedTypes.Where(typeof(IEntityWithSyncMetadata<Risk_SyncMetadata>).IsAssignableFrom)
+                .Select(t => Lifestyle.Scoped
+                .CreateRegistration(typeof(IDbRepository<>).MakeGenericType(t), container))
+                );
         }
 
         private void RegisterFuncFactory<TService, TImpl>(

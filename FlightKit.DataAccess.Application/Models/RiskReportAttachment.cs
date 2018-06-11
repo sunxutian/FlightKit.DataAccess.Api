@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace FlightKit.DataAccess.Application.Models
 {
-    public partial class RiskReportAttachment : IFlightDtoWithReportId, IDtoWithSyncMetadata<RiskSyncMetadata>
+    public partial class RiskReportAttachment : RiskDtoWithSyncMetadata, IFlightDtoWithReportId
     {
         public Guid ReportAttachmentIdentifier { get; set; }
         public Guid ReportIdentifier { get; set; }
@@ -14,6 +14,5 @@ namespace FlightKit.DataAccess.Application.Models
         public byte[] Attachment { get; set; }
         public string FileName { get; set; }
         public string AttachmentBase64 => Convert.ToBase64String(Attachment ?? new byte[] { });
-        public RiskSyncMetadata RiskSyncMetadata { get; set; }
     }
 }

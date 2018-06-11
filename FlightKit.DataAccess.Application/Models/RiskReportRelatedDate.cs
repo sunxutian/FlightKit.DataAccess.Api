@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace FlightKit.DataAccess.Application.Models
 {
-    public partial class RiskReportRelatedDate : IFlightDtoWithReportId, IDtoWithSyncMetadata<RiskSyncMetadata>
+    public partial class RiskReportRelatedDate : RiskDtoWithSyncMetadata, IFlightDtoWithReportId
     {
         public Guid ReportRelatedDateIdentifier { get; set; }
         public Guid ReportIdentifier { get; set; }
@@ -11,7 +11,5 @@ namespace FlightKit.DataAccess.Application.Models
         public DateTime? ReportDateTime { get; set; }
 
         public RiskReportDateTypeCode ReportDateTypeCode { get; set; }
-        public RiskSyncMetadata RiskSyncMetadata { get; set; }
-
     }
 }

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace FlightKit.DataAccess.Application.Models
 {
-    public partial class RiskWall : IFlightDtoWithReportId, IDtoWithSyncMetadata<RiskSyncMetadata>
+    public partial class RiskWall : RiskDtoWithSyncMetadata, IFlightDtoWithReportId
     {
         public Guid WallIdentifier { get; set; }
         public Guid ReportIdentifier { get; set; }

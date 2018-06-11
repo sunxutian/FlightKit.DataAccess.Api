@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace FlightKit.DataAccess.Application.Models
 {
-    public partial class RiskExposure : IFlightDtoWithReportId, IDtoWithSyncMetadata<RiskSyncMetadata>
+    public partial class RiskExposure : RiskDtoWithSyncMetadata, IFlightDtoWithReportId
     {
         public Guid ExposureIdentifier { get; set; }
         public Guid ReportIdentifier { get; set; }
@@ -24,7 +24,5 @@ namespace FlightKit.DataAccess.Application.Models
         public int? PassageLength { get; set; }
         public bool? IsPassageOpen { get; set; }
         public bool? IsPartyWall { get; set; }
-        public RiskSyncMetadata RiskSyncMetadata { get; set; }
-
     }
 }

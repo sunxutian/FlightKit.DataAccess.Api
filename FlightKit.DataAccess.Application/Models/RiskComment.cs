@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace FlightKit.DataAccess.Application.Models
 {
-    public partial class RiskComment : IFlightDtoWithReportId, IDtoWithSyncMetadata<RiskSyncMetadata>
+    public partial class RiskComment : RiskDtoWithSyncMetadata, IFlightDtoWithReportId
     {
         public RiskComment()
         {
@@ -16,7 +16,5 @@ namespace FlightKit.DataAccess.Application.Models
         public DateTime? CommentDateTime { get; set; }
         public string CommentType { get; set; }
         public ICollection<RiskCommentSegment> CommentSegments { get; set; }
-        public RiskSyncMetadata RiskSyncMetadata { get; set; }
-
     }
 }

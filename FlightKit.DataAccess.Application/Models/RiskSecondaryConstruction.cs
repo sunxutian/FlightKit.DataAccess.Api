@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace FlightKit.DataAccess.Application.Models
 {
-    public partial class RiskSecondaryConstruction : IFlightDtoWithReportId, IDtoWithSyncMetadata<RiskSyncMetadata>
+    public partial class RiskSecondaryConstruction : RiskDtoWithSyncMetadata, IFlightDtoWithReportId
     {
         public Guid SecondaryConstructionIdentifier { get; set; }
         public Guid ReportIdentifier { get; set; }
@@ -41,7 +41,5 @@ namespace FlightKit.DataAccess.Application.Models
         public string SolarPanelsCoverage { get; set; }
         public string GreenRoofCoverage { get; set; }
         public int? TotalEffectiveArea { get; set; }
-        public RiskSyncMetadata RiskSyncMetadata { get; set; }
-
     }
 }
