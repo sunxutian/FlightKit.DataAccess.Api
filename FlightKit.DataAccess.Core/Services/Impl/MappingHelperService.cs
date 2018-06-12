@@ -2,7 +2,6 @@
 using AutoMapper.QueryableExtensions;
 using FlightKit.DataAccess.Core.Helpers;
 using FlightKit.DataAccess.Domain.Repo;
-using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -30,11 +29,11 @@ namespace FlightKit.DataAccess.Core.Services.Impl
         }
 
 
-        public async Task<List<TDto>> MapQueryable<TSource, TDto>(IQueryable<TSource> sourceQueryable, bool includesSyncMetadata = false)
+        public IQueryable<TDto> MapQueryableFromEntity<TSource, TDto>(IQueryable<TSource> sourceQueryable, bool includesSyncMetadata = false)
+            where TSource : class, new()
         {
             IMapper mapper = includesSyncMetadata ? _mapperWithSyncMetadata : _mapperwithoutSyncMetadata;
-            var result = await sourceQueryable.ProjectTo<TDto>(mapper.ConfigurationProvider).ToListAsync().ConfigureAwait(false);
-
+            var result = sourceQueryable.ProjectTo<TDto>(mapper.ConfigurationProvider);
             return result;
         }
     }

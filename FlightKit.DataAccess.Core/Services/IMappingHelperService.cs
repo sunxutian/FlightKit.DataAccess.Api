@@ -22,13 +22,16 @@ namespace FlightKit.DataAccess.Core.Services
         TTarget Map<TTarget>(object source);
 
         /// <summary>
-        /// Maps the queryable to dto.
+        /// Maps the enity queryable to dto query.
         /// </summary>
         /// <typeparam name="TSource">The type of the source.</typeparam>
         /// <typeparam name="TDto">The type of the dto.</typeparam>
-        /// <param name="sourceQueryable">The source queryable.</param>
+        /// <param name="targetQueryable">The target queryable.</param>
         /// <param name="includesSyncMetadata">if set to <c>true</c> [includes synchronize metadata].</param>
-        /// <returns>map queryable to dto via querying db</returns>
-        Task<List<TDto>> MapQueryable<TSource, TDto>(IQueryable<TSource> sourceQueryable, bool includesSyncMetadata = false);
+        /// <returns>
+        /// map queryable to dto query
+        /// </returns>
+        IQueryable<TDto> MapQueryableFromEntity<TSource, TDto>(IQueryable<TSource> targetQueryable, bool includesSyncMetadata = false)
+            where TSource: class, new();
     }
 }

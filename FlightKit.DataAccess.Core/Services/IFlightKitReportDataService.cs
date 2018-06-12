@@ -15,13 +15,20 @@ namespace FlightKit.DataAccess.Core.Services
         Task<RiskReport> GetRiskReportByReportIdAsync(Guid reportId, bool includesSyncMetadata = false);
         Task<ICollection<RiskReport>> GetRiskReportsByRiskIdAsync(string riskId, bool includesSyncMetadata = false);
         Task<ICollection<RiskReport>> GetRiskReportsByOrderIdAsync(long orderId, bool includesSyncMetadata = false);
-        Task<ICollection<TDtoWithSyncMetadata>> GetRiskDataWithSyncMetadataAsync<TEntity, TDtoWithSyncMetadata>(Expression<Func<Risk_Report, bool>> filter,
-            Expression<Func<Risk_Report, IEnumerable<TEntity>>> getDataExp, DateTime? lastSyncDateTime = null)
+        Task<(ICollection<TDtoWithSyncMetadata> data, int totalReportsCount, Guid? reportCursor, bool hasNext)> GetRiskDataWithSyncMetadataAsync<TEntity, TDtoWithSyncMetadata>(Expression<Func<Risk_Report, bool>> filter,
+            Expression<Func<Risk_Report, IEnumerable<TEntity>>> getDataExp, DateTime? lastSyncDateTime = null,
+            Expression<Func<Risk_Report, IComparable>> orderby = null,
+            bool? isascending = true, Guid? startId = null,
+            int? first = null)
             where TDtoWithSyncMetadata : RiskDtoWithSyncMetadata
-            where TEntity : IEntityWithSyncMetadata<Risk_SyncMetadata>;
-        Task<ICollection<TDtoWithSyncMetadata>> GetRiskDataWithSyncMetadataAsync<TEntity, TDtoWithSyncMetadata>(Expression<Func<Risk_Report, bool>> filter,
-            Expression<Func<Risk_Report, TEntity>> getDataExp, DateTime? lastSyncDateTime = null)
+            where TEntity : class, IEntityWithSyncMetadata<Risk_SyncMetadata>, new();
+
+        Task<(ICollection<TDtoWithSyncMetadata> data, int totalReportsCount, Guid? reportCursor, bool hasNext)> GetRiskDataWithSyncMetadataAsync<TEntity, TDtoWithSyncMetadata>(Expression<Func<Risk_Report, bool>> filter,
+            Expression<Func<Risk_Report, TEntity>> getDataExp, DateTime? lastSyncDateTime = null,
+            Expression<Func<Risk_Report, IComparable>> orderby = null,
+            bool? isascending = true, Guid? startId = null,
+            int? first = null)
             where TDtoWithSyncMetadata : RiskDtoWithSyncMetadata
-            where TEntity : IEntityWithSyncMetadata<Risk_SyncMetadata>;
+            where TEntity : class, IEntityWithSyncMetadata<Risk_SyncMetadata>, new();
     }
 }

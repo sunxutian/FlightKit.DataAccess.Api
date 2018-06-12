@@ -1,8 +1,6 @@
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using System.Threading.Tasks;
 using AutoMapper;
 using FlightKit.DataAccess.Application.Mapping;
 using FlightKit.DataAccess.Core.GraphQL;
@@ -35,6 +33,14 @@ using System.Linq.Expressions;
 using FlightKit.DataAccess.Core.Helpers;
 using FlightKit.DataAccess.Domain.Data.Entity;
 using FlightKit.DataAccess.Domain.Data;
+using FlightKit.DataAccess.Core.UnitOfWork.CommandHandlers;
+using FlightKit.DataAccess.Api.UnitOfWork.CommandHandlerDecorators;
+using FlightKit.DataAccess.Core.UnitOfWork.Commands;
+using FlightKit.DataAccess.Application.Models;
+using System.Collections.Generic;
+using FlightKit.DataAccess.Api.Services;
+using GraphQL.Server.Ui.Voyager;
+using GraphQL.Server.Transports.WebSockets;
 
 namespace FlightKit.DataAccess.Api
 {
@@ -68,6 +74,7 @@ namespace FlightKit.DataAccess.Api
             services.AddSingleton<ISchema, FlightKitDataAccessSchema>();
 
             services.AddGraphQLHttp();
+            services.AddGraphQLWebSocket<ISchema>();
 
             if (HostingEnvironment.IsDevelopment())
             {
@@ -92,13 +99,22 @@ namespace FlightKit.DataAccess.Api
                 app.UseDeveloperExceptionPage();
             }
 
+            app.UseWebSockets();
+
             // add http for Schema at default url /graphql
             app.UseGraphQLHttp<ISchema>(new GraphQLHttpOptions());
+
+            // use websocket middleware for ChatSchema at default url /graphql
+            app.UseGraphQLWebSocket<ISchema>(new GraphQLWebSocketsOptions());
 
             if (env.IsDevelopment())
             {
                 // use graphql-playground at default url /ui/playground
                 app.UseGraphQLPlayground(new GraphQLPlaygroundOptions());
+
+                // use voyager middleware at default url /ui/voyager
+                app.UseGraphQLVoyager(new GraphQLVoyagerOptions());
+
             }
 
             app.UseMvc();
@@ -147,7 +163,50 @@ namespace FlightKit.DataAccess.Api
             SetupAutoMapper(container);
             SetupGraphQL(container);
             SetupService(container);
+            SetupUnitOrWork(container);
             //AllowResolvingFuncFactories(container.Options);
+        }
+
+        private void SetupUnitOrWork(Container container)
+        {
+            container.Register(typeof(ICommandHandler<,>), new[] { typeof(ICommandHandler<,>).Assembly },
+                            Lifestyle.Scoped);
+
+            SetupSyncMetadataFilterCommandHandler<Risk_Report, RiskReport>(container);
+            SetupSyncMetadataFilterCommandHandler<Risk_AdditionDate, RiskAdditionDate>(container);
+            SetupSyncMetadataFilterCommandHandler<Risk_Comment, RiskComment>(container);
+            SetupSyncMetadataFilterCommandHandler<Risk_CommentSegment, RiskCommentSegment>(container);
+            SetupSyncMetadataFilterCommandHandler<Risk_Exposure, RiskExposure>(container);
+            SetupSyncMetadataFilterCommandHandler<Risk_FireDivisionRisk, RiskFireDivisionRisk>(container);
+            SetupSyncMetadataFilterCommandHandler<Risk_FloorsAndRoof, RiskFloorsAndRoof>(container);
+            SetupSyncMetadataFilterCommandHandler<Risk_InternalProtection, RiskInternalProtection>(container);
+            SetupSyncMetadataFilterCommandHandler<Risk_Occupant, RiskOccupant>(container);
+            SetupSyncMetadataFilterCommandHandler<Risk_OccupantLevel, RiskOccupantLevel>(container);
+            SetupSyncMetadataFilterCommandHandler<Risk_OccupantHazard, RiskOccupantHazard>(container);
+            SetupSyncMetadataFilterCommandHandler<Risk_ProtectionSafeguard, RiskProtectionSafeguard>(container);
+            SetupSyncMetadataFilterCommandHandler<Risk_ReportAddress, RiskReportAddress>(container);
+            SetupSyncMetadataFilterCommandHandler<Risk_ReportAttachment, RiskReportAttachment>(container);
+            SetupSyncMetadataFilterCommandHandler<Risk_ReportBuildingInformation, RiskReportBuildingInformation>(container);
+            SetupSyncMetadataFilterCommandHandler<Risk_ReportHazard, RiskReportHazard>(container);
+            SetupSyncMetadataFilterCommandHandler<Risk_ReportPhoto, RiskReportPhoto>(container);
+            SetupSyncMetadataFilterCommandHandler<Risk_ReportRelatedDate, RiskReportRelatedDate>(container);
+            SetupSyncMetadataFilterCommandHandler<Risk_RetiredOccupantNumber, RiskRetiredOccupantNumber>(container);
+            SetupSyncMetadataFilterCommandHandler<Risk_SecondaryConstruction, RiskSecondaryConstruction>(container);
+            SetupSyncMetadataFilterCommandHandler<Risk_Wall, RiskWall>(container);
+
+            container.RegisterDecorator(typeof(ICommandHandler<,>), context =>
+                typeof(DbTransactionCommandHandlerDecorator<,,>).MakeGenericType(typeof(FlightKitDbContext), context.ServiceType.GetGenericArguments()[0], context.ServiceType.GetGenericArguments()[1]),
+                Lifestyle.Scoped, context => context.ImplementationType.GetCustomAttributes<TransactionAttribute>(true) != null);
+        }
+
+        private void SetupSyncMetadataFilterCommandHandler<TEntity, TDto>(Container container)
+            where TEntity : RiskEntityWithSyncMetadata, new()
+            where TDto : RiskDtoWithSyncMetadata
+        {
+            container.Register<
+                ICommandHandler<GetRiskSyncMetadataByRiskReportFilterCommand<TEntity, TDto>,
+                (ICollection<TDto> data, int totalReportsCount, Guid? endReportIdCursor, bool hasNext)>,
+                GetRiskSyncMetadataByRiskReportFilterCommandHandler<TEntity, TDto>>(Lifestyle.Scoped);
         }
 
         private void SetupService(Container container)
@@ -155,14 +214,16 @@ namespace FlightKit.DataAccess.Api
             container.RegisterSingleton<IMappingHelperService, MappingHelperService>();
             container.Register<IFlightKitReportDataService, FlightKitReportDataService>(Lifestyle.Scoped);
             RegisterFuncFactory<IFlightKitReportDataService, FlightKitReportDataService>(container, Lifestyle.Scoped);
+            container.RegisterSingleton<ICommandHandlerFactory, CommandHandlerFactory>();
+            container.Register(typeof(ITransactionFactory<>), typeof(TransactionFactory<>), Lifestyle.Scoped);
         }
 
         private void SetupGraphQL(Container container)
         {
             var graphQLTypes = typeof(RiskAdditionDateType).Assembly;
             var registrations = graphQLTypes.GetExportedTypes()
-                .Where(t => !t.IsAbstract && typeof(GenericGraphQLType<>).IsAssignableFrom(t))
-                .Where(t => t.Namespace == "FlightKit.DataAccess.Core.GraphQL.Types");
+                .Where(t => t.Namespace == "FlightKit.DataAccess.Core.GraphQL.Types")
+                .Where(t => !t.IsAbstract);
 
             foreach (var t in registrations)
             {
@@ -170,6 +231,7 @@ namespace FlightKit.DataAccess.Api
             }
 
             container.RegisterSingleton<FlightKitDataAccessQuery>();
+            container.RegisterSingleton<FlightKistDataAccessSubscription>();
         }
 
         private void SetupAutoMapper(Container container)
@@ -214,6 +276,13 @@ namespace FlightKit.DataAccess.Api
             container.RegisterConditional(typeof(IDbRepository<>), typeof(FlightKitDbRepository<>),
                 Lifestyle.Scoped,
                 config => !config.Handled);
+
+            container.Collection.Register<IDbRepository>(
+                typeof(Risk_Report).Assembly.ExportedTypes
+                    .Where(t => t.IsClass && !t.IsAbstract)
+                    .Where(typeof(IFlightKitEntity).IsAssignableFrom)
+                    .Select(t => typeof(FlightKitReadonlyDbRepository<>).MakeGenericType(t))
+                    .Select(t => Lifestyle.Scoped.CreateRegistration(t, container)));
         }
 
         private void RegisterFuncFactory<TService, TImpl>(
@@ -249,5 +318,22 @@ namespace FlightKit.DataAccess.Api
                 e.Register(Expression.Constant(factoryDelegate));
             };
         }
+
+        #region root service classes
+        private class CommandHandlerFactory : ICommandHandlerFactory
+        {
+            private readonly Container _container;
+
+            public CommandHandlerFactory(Container container)
+            {
+                _container = container;
+            }
+            public ICommandHandler<TCommand, TResult> RequestCommandHandler<TCommand, TResult>() 
+                where TCommand : ICommand
+            {
+                return _container.GetInstance<ICommandHandler<TCommand, TResult>>();
+            }
+        }
+        #endregion
     }
 }

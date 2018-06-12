@@ -31,12 +31,13 @@ namespace FlightKit.DataAccess.Core.Services.Impl
         private readonly IDbRepository<Risk_RetiredOccupantNumber> _retiredOccupantNumberRepo;
         private readonly IDbRepository<Risk_SecondaryConstruction> _secondaryConstructionRepo;
         private readonly IDbRepository<Risk_Wall> _wallRepo;
+        private readonly IEnumerable<IDbRepository> _repos;
         private readonly IMappingHelperService _mapper;
         private readonly IDbRepository<Risk_Report> _riskReportRepo;
-        private readonly IDbRepository<Risk_AdditionDate> _additionDataRepo;
+        private readonly IDbRepository<Risk_AdditionDate> _additionDateRepo;
 
         public FlightKitReportDataService(IDbRepository<Risk_Report> riskReportRepo,
-            IDbRepository<Risk_AdditionDate> additionDataRepo,
+            IDbRepository<Risk_AdditionDate> additionDateRepo,
             IDbRepository<Risk_Comment> commentRepo,
             IDbRepository<Risk_Exposure> exporeRepo,
             IDbRepository<Risk_FireDivisionRisk> fireDivisionRepo,
@@ -52,11 +53,11 @@ namespace FlightKit.DataAccess.Core.Services.Impl
             IDbRepository<Risk_ReportRelatedDate> relatedDataRepo,
             IDbRepository<Risk_RetiredOccupantNumber> retiredOccupantNumberRepo,
             IDbRepository<Risk_SecondaryConstruction> secondaryConstructionRepo,
-            IDbRepository<Risk_Wall> wallRepo,
+            IDbRepository<Risk_Wall> wallRepo, IEnumerable<IDbRepository> repos,
             IMappingHelperService mapper)
         {
             _riskReportRepo = riskReportRepo;
-            _additionDataRepo = additionDataRepo;
+            _additionDateRepo = additionDateRepo;
             _commentRepo = commentRepo;
             _exporeRepo = exporeRepo;
             _fireDivisionRepo = fireDivisionRepo;
@@ -73,18 +74,19 @@ namespace FlightKit.DataAccess.Core.Services.Impl
             _retiredOccupantNumberRepo = retiredOccupantNumberRepo;
             _secondaryConstructionRepo = secondaryConstructionRepo;
             _wallRepo = wallRepo;
+            _repos = repos;
             _mapper = mapper;
         }
 
         public async Task<RiskReport> GetRiskReportByReportIdAsync(Guid reportId, bool includesSyncMetadata = false)
         {
-            var reports = await GetRiskReportsBy(r => r.ReportIdentifier == reportId).ConfigureAwait(false);
+            var reports = await GetRiskReportsBy(r => r.ReportIdentifier == reportId, includesSyncMetadata).ConfigureAwait(false);
             return reports.FirstOrDefault();
         }
 
         public Task<ICollection<RiskReport>> GetRiskReportsByOrderIdAsync(long orderId, bool includesSyncMetadata = false)
         {
-            return GetRiskReportsBy(r => r.OrderId == orderId);
+            return GetRiskReportsBy(r => r.OrderId == orderId, includesSyncMetadata);
         }
 
         public Task<ICollection<RiskReport>> GetRiskReportsByRiskIdAsync(string riskId, bool includesSyncMetadata = false)
@@ -93,55 +95,72 @@ namespace FlightKit.DataAccess.Core.Services.Impl
         }
 
 
-        public async Task<ICollection<TDtoWithSyncMetadata>> GetRiskDataWithSyncMetadataAsync<TEntity, TDtoWithSyncMetadata>
+        public async Task<(ICollection<TDtoWithSyncMetadata> data, int totalReportsCount, Guid? reportCursor, bool hasNext)> GetRiskDataWithSyncMetadataAsync<TEntity, TDtoWithSyncMetadata>
             (Expression<Func<Risk_Report, bool>> filter,
-            Expression<Func<Risk_Report, IEnumerable<TEntity>>> getDataExp, DateTime? lastSyncDateTime = null)
-            where TEntity : IEntityWithSyncMetadata<Risk_SyncMetadata>
+            Expression<Func<Risk_Report, IEnumerable<TEntity>>> getDataExp, DateTime? lastSyncDateTime = null,
+            Expression<Func<Risk_Report, IComparable>> orderby = null,
+            bool? isascending = true, Guid? startId = null,
+            int? first = null)
+            where TEntity : class, IEntityWithSyncMetadata<Risk_SyncMetadata>, new()
             where TDtoWithSyncMetadata : RiskDtoWithSyncMetadata
         {
             var tableName = typeof(TEntity).GetCustomAttribute<TableNameAttribute>()?.TableName
                 ?? typeof(TDtoWithSyncMetadata).Name;
-            var query = _riskReportRepo.QueryBy(filter).SelectMany(getDataExp)
+
+            var (query, count, cursor, hasNext) = await ComposeRiskReportSelectQuery(filter, orderby, isascending, startId, first)
+                                                    .ConfigureAwait(false);
+
+            var finalQuery = query.SelectMany(getDataExp)
                 .Where(d => d.RiskSyncMetadata.SyncTable == null || d.RiskSyncMetadata.SyncTable == tableName);
 
             if (lastSyncDateTime != null)
             {
-                query = query.Where(d => d.RiskSyncMetadata.LastUpdateUtcDateTime > lastSyncDateTime.Value);
+                finalQuery = finalQuery.Where(d => d.RiskSyncMetadata.LastUpdateUtcDateTime > lastSyncDateTime.Value);
             }
-            var data = await _mapper.MapQueryable<TEntity, TDtoWithSyncMetadata>(query, true).ConfigureAwait(false);
 
-            return data;
+            var data = await GetRepo<TEntity>().QueryAsync(_mapper.MapQueryableFromEntity<TEntity, TDtoWithSyncMetadata>(finalQuery, true)).ConfigureAwait(false);
+
+            return (data, count, cursor, hasNext);
         }
 
-        public async Task<ICollection<TDtoWithSyncMetadata>> GetRiskDataWithSyncMetadataAsync<TEntity, TDtoWithSyncMetadata>
+        public async Task<(ICollection<TDtoWithSyncMetadata> data, int totalReportsCount, Guid? reportCursor, bool hasNext)> GetRiskDataWithSyncMetadataAsync<TEntity, TDtoWithSyncMetadata>
             (Expression<Func<Risk_Report, bool>> filter,
-            Expression<Func<Risk_Report, TEntity>> getDataExp, DateTime? lastSyncDateTime = null)
-            where TEntity : IEntityWithSyncMetadata<Risk_SyncMetadata>
+            Expression<Func<Risk_Report, TEntity>> getDataExp, DateTime? lastSyncDateTime = null,
+            Expression<Func<Risk_Report, IComparable>> orderby = null,
+            bool? isascending = true, Guid? startId = null,
+            int? first = null)
+            where TEntity : class, IEntityWithSyncMetadata<Risk_SyncMetadata>, new()
             where TDtoWithSyncMetadata : RiskDtoWithSyncMetadata
         {
             var tableName = typeof(TEntity).GetCustomAttribute<TableNameAttribute>()?.TableName
                 ?? typeof(TDtoWithSyncMetadata).Name;
-            var query = _riskReportRepo.QueryBy(filter).Select(getDataExp)
+
+            var (query, count, cursor, hasNext) = await ComposeRiskReportSelectQuery(filter, orderby, isascending, startId, first)
+                                                    .ConfigureAwait(false);
+
+            var finalQuery = query.Select(getDataExp)
                 .Where(d => d.RiskSyncMetadata.SyncTable == null || d.RiskSyncMetadata.SyncTable == tableName);
 
             if (lastSyncDateTime != null)
             {
-                query = query.Where(d => d.RiskSyncMetadata.LastUpdateUtcDateTime > lastSyncDateTime.Value);
+                finalQuery = finalQuery.Where(d => d.RiskSyncMetadata.LastUpdateUtcDateTime > lastSyncDateTime.Value);
             }
 
-            var data = await _mapper.MapQueryable<TEntity, TDtoWithSyncMetadata>(query, true).ConfigureAwait(false);
+            var data = await GetRepo<TEntity>().QueryAsync(_mapper.MapQueryableFromEntity<TEntity, TDtoWithSyncMetadata>(finalQuery, true)).ConfigureAwait(false);
 
-            return data;
+            return (data, count, cursor, hasNext);
         }
 
         #region private methods
-        private async Task<ICollection<RiskReport>> GetRiskReportsBy(Expression<Func<Risk_Report, bool>> filter, bool includesSyncMetadata = false)
+        private async Task<ICollection<RiskReport>> GetRiskReportsBy(Expression<Func<Risk_Report, bool>> filter,
+            bool includesSyncMetadata = false)
         {
-            var riskReports = await _mapper.MapQueryable<Risk_Report, RiskReport>(_riskReportRepo.QueryBy(filter),
-                includesSyncMetadata).ConfigureAwait(false);
+            var riskReports = await _riskReportRepo
+                .QueryAsync(_mapper.MapQueryableFromEntity<Risk_Report, RiskReport>(_riskReportRepo.QueryBy(filter), includesSyncMetadata))
+                .ConfigureAwait(false);
 
             var reportIds = riskReports.Select(r => r.ReportIdentifier).ToArray();
-            var additionDateTask = GetChildrenByReportId<Risk_AdditionDate, RiskAdditionDate>(_additionDataRepo, includesSyncMetadata, reportIds);
+            var additionDateTask = GetChildrenByReportId<Risk_AdditionDate, RiskAdditionDate>(_additionDateRepo, includesSyncMetadata, reportIds);
             var commentsTask = GetChildrenByReportId<Risk_Comment, RiskComment>(_commentRepo, includesSyncMetadata, reportIds);
             var exposuresTask = GetChildrenByReportId<Risk_Exposure, RiskExposure>(_exporeRepo, includesSyncMetadata, reportIds);
             var fireDivisionTask = GetChildrenByReportId<Risk_FireDivisionRisk, RiskFireDivisionRisk>(_fireDivisionRepo, includesSyncMetadata, reportIds);
@@ -194,9 +213,41 @@ namespace FlightKit.DataAccess.Core.Services.Impl
             where TEntity : class, IFlightKitEntityWithReportId, new()
         {
             var query = repo.QueryBy(d => riskreportIds.Contains(d.ReportIdentifier));
-            var data = await _mapper.MapQueryable<TEntity, TDto>(query, includesSyncMetadata).ConfigureAwait(false);
+            var dtoQuery = _mapper.MapQueryableFromEntity<TEntity, TDto>(query, includesSyncMetadata);
+
+            var data = await GetRepo<TEntity>().QueryAsync(dtoQuery).ConfigureAwait(false);
 
             return data;
+        }
+
+        private async Task<(IQueryable<Risk_Report> query, int totalCount, Guid? cursor, bool hasNext)> ComposeRiskReportSelectQuery(Expression<Func<Risk_Report, bool>> filter,
+            Expression<Func<Risk_Report, IComparable>> orderby = null,
+            bool? isascending = true, Guid? startId = null,
+            int? first = null)
+        {
+            var query = _riskReportRepo.QueryBy(filter);
+            query = orderby == null ? query : (isascending == true ? query.OrderBy(orderby) : query.OrderByDescending(orderby));
+            var allReportIds = await _riskReportRepo.QueryAsync(query.Select(q => q.ReportIdentifier)).ConfigureAwait(false);
+
+            var totalCount = allReportIds.Count;
+            int skipCount = startId != null ? allReportIds.TakeWhile(id => id != startId.Value).Count() + 1 : 0;
+
+            query = query.Skip(skipCount);
+            query = first == null ? query : query.Take(first.Value);
+
+            var hasNext = first == null ? false : totalCount > (first.Value + skipCount);
+            int leftCount = first == null ? totalCount - skipCount : Math.Min(totalCount - skipCount, first.Value);
+            var cursor = hasNext ?
+                allReportIds.Take(first.Value + skipCount).LastOrDefault() :
+                allReportIds.LastOrDefault();
+
+            return (query, leftCount, cursor, hasNext);
+        }
+
+        private IDbRepository<TEntity> GetRepo<TEntity>()
+            where TEntity : class, new()
+        {
+            return _repos?.SingleOrDefault(t => t.GetType().GetGenericArguments()[0] == typeof(TEntity)) as IDbRepository<TEntity>;
         }
         #endregion
     }

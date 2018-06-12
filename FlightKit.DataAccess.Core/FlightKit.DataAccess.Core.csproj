@@ -5,6 +5,11 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="GraphQL\FlightKitDataAccessQuery.cs~RF420ec74d.TMP" />
+    <None Remove="Services\Impl\FlightKitReportDataService.cs~RF425fc426.TMP" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="GraphQL" Version="2.0.0-alpha-912" />
   </ItemGroup>
 

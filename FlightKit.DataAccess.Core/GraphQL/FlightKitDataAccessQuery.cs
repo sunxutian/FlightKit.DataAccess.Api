@@ -1,38 +1,46 @@
 ﻿using FlightKit.DataAccess.Application.Models;
+using FlightKit.DataAccess.Core.GraphQL.PaginationType;
 using FlightKit.DataAccess.Core.GraphQL.Types;
 using FlightKit.DataAccess.Core.Services;
+using FlightKit.DataAccess.Core.UnitOfWork.Commands;
 using FlightKit.DataAccess.Domain.Data;
 using FlightKit.DataAccess.Domain.Data.Entity;
-using FlightKit.DataAccess.Domain.Repo;
 using GraphQL;
 using GraphQL.Types;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
-using System.Reflection;
-using System.Threading.Tasks;
 
 namespace FlightKit.DataAccess.Core.GraphQL
 {
     public class FlightKitDataAccessQuery : ObjectGraphType<object>
     {
-        private readonly Func<IFlightKitReportDataService> _reportDataServiceFactory;
+        private readonly ICommandHandlerFactory _commandHandlerFactory;
 
-        public FlightKitDataAccessQuery(Func<IFlightKitReportDataService> reportDataServiceFactory)
+        public FlightKitDataAccessQuery(ICommandHandlerFactory commandHandlerFactory)
         {
             Name = "Query";
-            _reportDataServiceFactory = reportDataServiceFactory;
+            _commandHandlerFactory = commandHandlerFactory;
 
             FieldAsync<RiskReportType>("riskReportByReportId",
                 arguments: new QueryArguments(
                     new QueryArgument<NonNullGraphType<IdGraphType>> { Name = "reportId", Description = "Report Identifier" },
-                    new QueryArgument<BooleanGraphType> {Name = "includeSyncMetadata", Description = "If returns the data with sync metadata", DefaultValue = false }),
+                    new QueryArgument<BooleanGraphType> { Name = "includeSyncMetadata", Description = "If returns the data with sync metadata", DefaultValue = false }),
                 resolve: async context =>
                     {
                         var id = context.GetArgument<Guid>("reportId");
                         var includesSyncMetadata = context.GetArgument<bool>("includeSyncMetadata");
-                        var report = await reportDataServiceFactory().GetRiskReportByReportIdAsync(id, includesSyncMetadata).ConfigureAwait(false);
+                        GetRiskReportByReportIdCommand command = new GetRiskReportByReportIdCommand
+                        {
+                            ReportId = id,
+                            IncludeSyncMetadata = includesSyncMetadata
+                        };
+
+                        var report = await _commandHandlerFactory.
+                            RequestCommandHandler<GetRiskReportByReportIdCommand, RiskReport>().HandleAsync(command)
+                            .ConfigureAwait(false);
+
                         return report;
                     });
 
@@ -44,7 +52,16 @@ namespace FlightKit.DataAccess.Core.GraphQL
                 {
                     var riskId = context.GetArgument<string>("riskId");
                     var includesSyncMetadata = context.GetArgument<bool>("includeSyncMetadata");
-                    var reports = await reportDataServiceFactory().GetRiskReportsByRiskIdAsync(riskId, includesSyncMetadata).ConfigureAwait(false);
+                    GetRiskReportsByRiskIdCommand command = new GetRiskReportsByRiskIdCommand
+                    {
+                        RiskId = riskId,
+                        IncludeSyncMetadata = includesSyncMetadata
+                    };
+
+                    var reports = await _commandHandlerFactory
+                    .RequestCommandHandler<GetRiskReportsByRiskIdCommand, ICollection<RiskReport>>()
+                        .HandleAsync(command).ConfigureAwait(false);
+
                     return reports;
                 });
 
@@ -87,29 +104,60 @@ namespace FlightKit.DataAccess.Core.GraphQL
                     var id = context.GetArgument<Guid>("reportId");
                     var lastSyncTime = context.GetArgument<DateTime?>("lastSyncDateTime");
 
-                    var result = await _reportDataServiceFactory()
-                        .GetRiskDataWithSyncMetadataAsync<TEntity, TDto>(r => r.ReportIdentifier == id, getDataExp, lastSyncTime)
-                        .ConfigureAwait(false);
+                    GetRiskSyncMetadataByRiskReportFilterCommand<TEntity, TDto> command =
+                        new GetRiskSyncMetadataByRiskReportFilterCommand<TEntity, TDto>(
+                            r => r.ReportIdentifier == id, getDataExp, lastSyncTime);
 
-                    return result;
+                    var result = await _commandHandlerFactory
+                    .RequestCommandHandler<GetRiskSyncMetadataByRiskReportFilterCommand<TEntity, TDto>,
+                        (ICollection<TDto> data, int totalReportsCount, Guid? endReportIdCursor, bool hasNext)>()
+                        .HandleAsync(command).ConfigureAwait(false);
+
+                    return result.data;
                 });
 
-            FieldAsync<ListGraphType<TRiskDtoWithSyncMetadataType>>($"{typeof(TDto).Name.ToCamelCase()}WithSyncMetadataByOrderIds",
+            FieldAsync<PaginationConnectionType<TRiskDtoWithSyncMetadataType, TDto>>($"{typeof(TDto).Name.ToCamelCase()}WithSyncMetadataByOrderIds",
                 arguments:
                 new QueryArguments(
                     new QueryArgument<NonNullGraphType<ListGraphType<IntGraphType>>> { Name = "orderIds", Description = "OrderIds" },
-                    new QueryArgument<DateGraphType> { Name = "lastSyncDateTime", Description = "Last Sync Date Time" }),
+                    new QueryArgument<DateGraphType> { Name = "lastSyncDateTime", Description = "Last Sync Date Time" },
+                    new QueryArgument<EnumerationGraphType<OrderBy>> { Name = "orderBy", DefaultValue = OrderBy.ReportId },
+                    new QueryArgument<EnumerationGraphType<Order>> { Name = "order", DefaultValue = Order.Ascending },
+                    new QueryArgument<IntGraphType> { Name = "first", Description = "only query first x rows of data" },
+                    new QueryArgument<IdGraphType> { Name = "after", Description = "after this cursor to query data" }),
                 resolve: async context =>
                 {
                     var orderIds = context.GetArgument<List<long>>("orderIds");
                     var lastSyncTime = context.GetArgument<DateTime?>("lastSyncDateTime");
+                    var first = context.GetArgument<int?>("first");
+                    var after = context.GetArgument<Guid?>("after");
+                    var orderBy = context.GetArgument<OrderBy>("orderBy");
+                    var order = context.GetArgument<Order>("order");
+                    bool isascending = order == Order.Ascending;
+                    Expression<Func<Risk_Report, bool>> filter =
+                        r => r.OrderId != null && orderIds.Contains(r.OrderId.Value);
 
-                    var result = await _reportDataServiceFactory()
-                        .GetRiskDataWithSyncMetadataAsync<TEntity, TDto>(r => r.OrderId != null && 
-                            orderIds.Contains(r.OrderId.Value), getDataExp, lastSyncTime)
-                        .ConfigureAwait(false);
+                    Expression<Func<Risk_Report, IComparable>> orderby = 
+                        first != null || after != null 
+                        ? GetOrderByExpression(orderBy) 
+                        : null;
 
-                    return result;
+                    GetRiskSyncMetadataByRiskReportFilterCommand<TEntity, TDto> command =
+                        new GetRiskSyncMetadataByRiskReportFilterCommand<TEntity, TDto>(
+                            filter, getDataExp, lastSyncTime,
+                            orderby, isascending, after, first);
+
+                    (ICollection<TDto> data, int totalReportsCount, Guid? endReportCursor, bool hasNext) =
+                        await _commandHandlerFactory.RequestCommandHandler<GetRiskSyncMetadataByRiskReportFilterCommand<TEntity, TDto>,
+                        (ICollection<TDto> data, int totalReportsCount, Guid? endReportCursor, bool hasNext)>()
+                        .HandleAsync(command).ConfigureAwait(false);
+
+                    return new PaginationConnection<TDto>
+                    {
+                        TotalCount = totalReportsCount,
+                        Edges = data.Select(d => new PaginationEdges<TDto> { Node = d, Cursor = d.ReportId?.ToString() }).ToList(),
+                        PageInfo = new PaginationPageInfo { EndCursor = endReportCursor?.ToString(), HasNextPage = hasNext }
+                    };
                 });
         }
 
@@ -127,31 +175,99 @@ namespace FlightKit.DataAccess.Core.GraphQL
                 {
                     var id = context.GetArgument<Guid>("reportId");
                     var lastSyncTime = context.GetArgument<DateTime?>("lastSyncDateTime");
+                    GetRiskSyncMetadataByRiskReportFilterCommand<TEntity, TDto> command =
+                       new GetRiskSyncMetadataByRiskReportFilterCommand<TEntity, TDto>(
+                           r => r.ReportIdentifier == id, getDataExp, lastSyncTime);
 
-                    var result = await _reportDataServiceFactory()
-                        .GetRiskDataWithSyncMetadataAsync<TEntity, TDto>(r => r.ReportIdentifier == id, getDataExp, lastSyncTime)
-                        .ConfigureAwait(false);
+                    var result = await _commandHandlerFactory
+                    .RequestCommandHandler<GetRiskSyncMetadataByRiskReportFilterCommand<TEntity, TDto>,
+                        (ICollection<TDto> data, int totalReportsCount, Guid? endReportIdCursor, bool hasNext)>()
+                        .HandleAsync(command).ConfigureAwait(false);
 
-                    return result;
+                    return result.data;
                 });
 
-            FieldAsync<ListGraphType<TRiskDtoWithSyncMetadataType>>($"{typeof(TDto).Name.ToCamelCase()}WithSyncMetadataByOrderIds",
+            FieldAsync<PaginationConnectionType<TRiskDtoWithSyncMetadataType, TDto>>($"{typeof(TDto).Name.ToCamelCase()}WithSyncMetadataByOrderIds",
                 arguments:
                 new QueryArguments(
                     new QueryArgument<NonNullGraphType<ListGraphType<IntGraphType>>> { Name = "orderIds", Description = "OrderIds" },
-                    new QueryArgument<DateGraphType> { Name = "lastSyncDateTime", Description = "Last Sync Date Time" }),
+                    new QueryArgument<DateGraphType> { Name = "lastSyncDateTime", Description = "Last Sync Date Time" },
+                    new QueryArgument<EnumerationGraphType<OrderBy>> { Name = "orderBy", DefaultValue = OrderBy.ReportId },
+                    new QueryArgument<EnumerationGraphType<Order>> { Name = "order", DefaultValue = Order.Ascending },
+                    new QueryArgument<IntGraphType> { Name = "first", Description = "only query first x rows of data" },
+                    new QueryArgument<IdGraphType> { Name = "after", Description = "after this cursor to query data" }),
                 resolve: async context =>
                 {
                     var orderIds = context.GetArgument<List<long>>("orderIds");
                     var lastSyncTime = context.GetArgument<DateTime?>("lastSyncDateTime");
+                    var first = context.GetArgument<int?>("first");
+                    var after = context.GetArgument<Guid?>("after");
+                    var order = context.GetArgument<Order>("order");
+                    var orderBy = context.GetArgument<OrderBy>("orderBy");
+                    bool isascending = order == Order.Ascending;
+                    Expression<Func<Risk_Report, bool>> filter =
+                        r => r.OrderId != null && orderIds.Contains(r.OrderId.Value);
 
-                    var result = await _reportDataServiceFactory()
-                        .GetRiskDataWithSyncMetadataAsync<TEntity, TDto>(r => r.OrderId != null && 
-                            orderIds.Contains(r.OrderId.Value), getDataExp, lastSyncTime)
-                        .ConfigureAwait(false);
+                    Expression<Func<Risk_Report, IComparable>> orderby =
+                        first != null || after != null
+                        ? GetOrderByExpression(orderBy)
+                        : null;
 
-                    return result;
+                    GetRiskSyncMetadataByRiskReportFilterCommand<TEntity, TDto> command =
+                        new GetRiskSyncMetadataByRiskReportFilterCommand<TEntity, TDto>(
+                            filter, getDataExp, lastSyncTime,
+                            orderby, isascending, after, first);
+
+                    (ICollection<TDto> data, int totalReportsCount, Guid? endReportCursor, bool hasNext) =
+                        await _commandHandlerFactory.RequestCommandHandler<GetRiskSyncMetadataByRiskReportFilterCommand<TEntity, TDto>,
+                        (ICollection<TDto> data, int totalReportsCount, Guid? endReportCursor, bool hasNext)>()
+                        .HandleAsync(command).ConfigureAwait(false);
+
+                    return new PaginationConnection<TDto>
+                    {
+                        TotalCount = totalReportsCount,
+                        Edges = data.Select(d => new PaginationEdges<TDto> { Node = d, Cursor = d.ReportId?.ToString() }).ToList(),
+                        PageInfo = new PaginationPageInfo { EndCursor = endReportCursor?.ToString(), HasNextPage = hasNext }
+                    };
                 });
+        }
+
+        private Expression<Func<Risk_Report, IComparable>> GetOrderByExpression( OrderBy orderBy)
+        {
+            switch (orderBy)
+            {
+                case OrderBy.OrderId:
+                    return r => r.OrderId;
+                case OrderBy.ReportId:
+                    return r => r.ReportIdentifier;
+                case OrderBy.OnSiteSurveyDate:
+                    return r => r.ReportRelatedDates
+                        .FirstOrDefault(d => d.ReportDateTypeCodeValue == "OSSD")
+                        .ReportDateTime;
+                case OrderBy.ScheduleApplyDate:
+                    return r => r.ReportRelatedDates
+                        .FirstOrDefault(d => d.ReportDateTypeCodeValue == "SDAP")
+                        .ReportDateTime;
+                default:
+                    return null;
+            }
+        }
+
+        #endregion
+
+        #region private helpers
+        private enum Order
+        {
+            Ascending,
+            Descending
+        }
+
+        private enum OrderBy
+        {
+            OrderId,
+            ReportId,
+            OnSiteSurveyDate,
+            ScheduleApplyDate
         }
         #endregion
     }

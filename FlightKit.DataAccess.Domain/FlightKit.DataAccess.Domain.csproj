@@ -15,6 +15,7 @@
 
   <ItemGroup>
     <None Remove="Data\FlightKitDbContext.cs~RF2a4f893a.TMP" />
+    <None Remove="Data\IFlightKitEntity.cs~RF39aa27e0.TMP" />
   </ItemGroup>
 
   <ItemGroup>
