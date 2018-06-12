@@ -25,20 +25,26 @@ namespace FlightKit.DataAccess.Core.GraphQL
             _reportDataServiceFactory = reportDataServiceFactory;
 
             FieldAsync<RiskReportType>("riskReportByReportId",
-                arguments: new QueryArguments(new QueryArgument<IdGraphType> { Name = "reportId", Description = "Report Identifier" }),
+                arguments: new QueryArguments(
+                    new QueryArgument<NonNullGraphType<IdGraphType>> { Name = "reportId", Description = "Report Identifier" },
+                    new QueryArgument<BooleanGraphType> {Name = "includeSyncMetadata", Description = "If returns the data with sync metadata", DefaultValue = false }),
                 resolve: async context =>
                     {
                         var id = context.GetArgument<Guid>("reportId");
-                        var report = await reportDataServiceFactory().GetRiskReportByReportIdAsync(id, false).ConfigureAwait(false);
+                        var includesSyncMetadata = context.GetArgument<bool>("includeSyncMetadata");
+                        var report = await reportDataServiceFactory().GetRiskReportByReportIdAsync(id, includesSyncMetadata).ConfigureAwait(false);
                         return report;
                     });
 
             FieldAsync<ListGraphType<RiskReportType>>("riskReportsByRiskId",
-                arguments: new QueryArguments(new QueryArgument<StringGraphType> { Name = "riskId", Description = "Risk Id" }),
+                arguments: new QueryArguments(
+                    new QueryArgument<StringGraphType> { Name = "riskId", Description = "Risk Id" },
+                    new QueryArgument<BooleanGraphType> { Name = "includeSyncMetadata", Description = "If returns the data with sync metadata", DefaultValue = false }),
                 resolve: async context =>
                 {
                     var riskId = context.GetArgument<string>("riskId");
-                    var reports = await reportDataServiceFactory().GetRiskReportsByRiskIdAsync(riskId, false).ConfigureAwait(false);
+                    var includesSyncMetadata = context.GetArgument<bool>("includeSyncMetadata");
+                    var reports = await reportDataServiceFactory().GetRiskReportsByRiskIdAsync(riskId, includesSyncMetadata).ConfigureAwait(false);
                     return reports;
                 });
 
