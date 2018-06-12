@@ -93,8 +93,9 @@ namespace FlightKit.DataAccess.Core.Services.Impl
         }
 
 
-        public async Task<ICollection<TDtoWithSyncMetadata>> GetRiskDataWithSyncMetadataByReportIdAsync<TEntity, TDtoWithSyncMetadata>
-            (Expression<Func<Risk_Report, bool>> filter, Expression<Func<Risk_Report, IEnumerable<TEntity>>> getDataExp)
+        public async Task<ICollection<TDtoWithSyncMetadata>> GetRiskDataWithSyncMetadataAsync<TEntity, TDtoWithSyncMetadata>
+            (Expression<Func<Risk_Report, bool>> filter,
+            Expression<Func<Risk_Report, IEnumerable<TEntity>>> getDataExp, DateTime? lastSyncDateTime = null)
             where TEntity : IEntityWithSyncMetadata<Risk_SyncMetadata>
             where TDtoWithSyncMetadata : RiskDtoWithSyncMetadata
         {
@@ -102,13 +103,19 @@ namespace FlightKit.DataAccess.Core.Services.Impl
                 ?? typeof(TDtoWithSyncMetadata).Name;
             var query = _riskReportRepo.QueryBy(filter).SelectMany(getDataExp)
                 .Where(d => d.RiskSyncMetadata.SyncTable == null || d.RiskSyncMetadata.SyncTable == tableName);
+
+            if (lastSyncDateTime != null)
+            {
+                query = query.Where(d => d.RiskSyncMetadata.LastUpdateUtcDateTime > lastSyncDateTime.Value);
+            }
             var data = await _mapper.MapQueryable<TEntity, TDtoWithSyncMetadata>(query, true).ConfigureAwait(false);
 
             return data;
         }
 
-        public async Task<ICollection<TDtoWithSyncMetadata>> GetRiskDataWithSyncMetadataByReportIdAsync<TEntity, TDtoWithSyncMetadata>
-            (Expression<Func<Risk_Report, bool>> filter, Expression<Func<Risk_Report, TEntity>> getDataExp)
+        public async Task<ICollection<TDtoWithSyncMetadata>> GetRiskDataWithSyncMetadataAsync<TEntity, TDtoWithSyncMetadata>
+            (Expression<Func<Risk_Report, bool>> filter,
+            Expression<Func<Risk_Report, TEntity>> getDataExp, DateTime? lastSyncDateTime = null)
             where TEntity : IEntityWithSyncMetadata<Risk_SyncMetadata>
             where TDtoWithSyncMetadata : RiskDtoWithSyncMetadata
         {
@@ -116,6 +123,12 @@ namespace FlightKit.DataAccess.Core.Services.Impl
                 ?? typeof(TDtoWithSyncMetadata).Name;
             var query = _riskReportRepo.QueryBy(filter).Select(getDataExp)
                 .Where(d => d.RiskSyncMetadata.SyncTable == null || d.RiskSyncMetadata.SyncTable == tableName);
+
+            if (lastSyncDateTime != null)
+            {
+                query = query.Where(d => d.RiskSyncMetadata.LastUpdateUtcDateTime > lastSyncDateTime.Value);
+            }
+
             var data = await _mapper.MapQueryable<TEntity, TDtoWithSyncMetadata>(query, true).ConfigureAwait(false);
 
             return data;
@@ -124,8 +137,8 @@ namespace FlightKit.DataAccess.Core.Services.Impl
         #region private methods
         private async Task<ICollection<RiskReport>> GetRiskReportsBy(Expression<Func<Risk_Report, bool>> filter, bool includesSyncMetadata = false)
         {
-            var riskReports = await _mapper.GetMappedDtoFromDbAsync<Risk_Report, RiskReport>(_riskReportRepo, filter)
-                .ConfigureAwait(false);
+            var riskReports = await _mapper.MapQueryable<Risk_Report, RiskReport>(_riskReportRepo.QueryBy(filter),
+                includesSyncMetadata).ConfigureAwait(false);
 
             var reportIds = riskReports.Select(r => r.ReportIdentifier).ToArray();
             var additionDateTask = GetChildrenByReportId<Risk_AdditionDate, RiskAdditionDate>(_additionDataRepo, includesSyncMetadata, reportIds);
@@ -180,8 +193,8 @@ namespace FlightKit.DataAccess.Core.Services.Impl
         private async Task<ICollection<TDto>> GetChildrenByReportId<TEntity, TDto>(IDbRepository<TEntity> repo, bool includesSyncMetadata = false, params Guid[] riskreportIds)
             where TEntity : class, IFlightKitEntityWithReportId, new()
         {
-            var data = await _mapper.GetMappedDtoFromDbAsync<TEntity, TDto>(repo,
-                d => riskreportIds.Contains(d.ReportIdentifier), includesSyncMetadata).ConfigureAwait(false);
+            var query = repo.QueryBy(d => riskreportIds.Contains(d.ReportIdentifier));
+            var data = await _mapper.MapQueryable<TEntity, TDto>(query, includesSyncMetadata).ConfigureAwait(false);
 
             return data;
         }

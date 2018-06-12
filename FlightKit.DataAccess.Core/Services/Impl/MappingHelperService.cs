@@ -29,14 +29,6 @@ namespace FlightKit.DataAccess.Core.Services.Impl
             return _mapperwithoutSyncMetadata.Map<TTarget>(source);
         }
 
-        public async Task<List<T>> GetMappedDtoFromDbAsync<TDomain, T>(IDbRepository<TDomain> repo, 
-            Expression<Func<TDomain, bool>> predicate, bool includesSyncMetadata = false) where TDomain : class, new()
-        {
-            IMapper mapper = includesSyncMetadata ? _mapperWithSyncMetadata : _mapperwithoutSyncMetadata;
-
-            var result = await repo.QueryBy(predicate).ProjectTo<T>(mapper.ConfigurationProvider).ToListAsync().ConfigureAwait(false);
-            return result;
-        }
 
         public async Task<List<TDto>> MapQueryable<TSource, TDto>(IQueryable<TSource> sourceQueryable, bool includesSyncMetadata = false)
         {

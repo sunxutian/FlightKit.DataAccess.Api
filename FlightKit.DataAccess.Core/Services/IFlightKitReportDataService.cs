@@ -15,12 +15,12 @@ namespace FlightKit.DataAccess.Core.Services
         Task<RiskReport> GetRiskReportByReportIdAsync(Guid reportId, bool includesSyncMetadata = false);
         Task<ICollection<RiskReport>> GetRiskReportsByRiskIdAsync(string riskId, bool includesSyncMetadata = false);
         Task<ICollection<RiskReport>> GetRiskReportsByOrderIdAsync(long orderId, bool includesSyncMetadata = false);
-        Task<ICollection<TDtoWithSyncMetadata>> GetRiskDataWithSyncMetadataByReportIdAsync<TEntity, TDtoWithSyncMetadata>(Expression<Func<Risk_Report, bool>> filter,
-            Expression<Func<Risk_Report, IEnumerable<TEntity>>> getDataExp)
+        Task<ICollection<TDtoWithSyncMetadata>> GetRiskDataWithSyncMetadataAsync<TEntity, TDtoWithSyncMetadata>(Expression<Func<Risk_Report, bool>> filter,
+            Expression<Func<Risk_Report, IEnumerable<TEntity>>> getDataExp, DateTime? lastSyncDateTime = null)
             where TDtoWithSyncMetadata : RiskDtoWithSyncMetadata
             where TEntity : IEntityWithSyncMetadata<Risk_SyncMetadata>;
-        Task<ICollection<TDtoWithSyncMetadata>> GetRiskDataWithSyncMetadataByReportIdAsync<TEntity, TDtoWithSyncMetadata>(Expression<Func<Risk_Report, bool>> filter,
-            Expression<Func<Risk_Report, TEntity>> getDataExp)
+        Task<ICollection<TDtoWithSyncMetadata>> GetRiskDataWithSyncMetadataAsync<TEntity, TDtoWithSyncMetadata>(Expression<Func<Risk_Report, bool>> filter,
+            Expression<Func<Risk_Report, TEntity>> getDataExp, DateTime? lastSyncDateTime = null)
             where TDtoWithSyncMetadata : RiskDtoWithSyncMetadata
             where TEntity : IEntityWithSyncMetadata<Risk_SyncMetadata>;
     }
