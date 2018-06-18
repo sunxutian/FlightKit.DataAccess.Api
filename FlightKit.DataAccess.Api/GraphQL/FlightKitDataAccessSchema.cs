@@ -15,7 +15,6 @@ namespace FlightKit.DataAccess.Api.GraphQL
             : base(resolver)
         {
             Query = resolver.Resolve<FlightKitDataAccessQuery>();
-            //Subscription = resolver.Resolve<FlightKistDataAccessSubscription>();
         }
     }
 }

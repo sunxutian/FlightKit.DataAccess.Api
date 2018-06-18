@@ -109,7 +109,8 @@ namespace FlightKit.DataAccess.Application.Models
         public string InaccessibleAreaComment { get; set; }
         public bool? IsSprinklerNotUpdated { get; set; }
         public bool? IsWindNotUpdated { get; set; }
-
+        public double? RooftopPlacementLat { get; set; }
+        public double? RooftopPlacementLong { get; set; }
         public ICollection<RiskAdditionDate> AdditionDates { get; set; }
         public ICollection<RiskComment> Comments { get; set; }
         public ICollection<RiskExposure> Exposures { get; set; }

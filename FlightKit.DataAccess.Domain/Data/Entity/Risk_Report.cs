@@ -1,10 +1,11 @@
-﻿using FlightKit.DataAccess.Domain.Data.Entity;
+﻿using FlightKit.DataAccess.Domain.Helpers;
 using System;
 using System.Collections.Generic;
 
 namespace FlightKit.DataAccess.Domain.Data.Entity
 {
-    [Helpers.TableName("Risks", "Reports")]
+    [TableName("Risks", "Reports")]
+    [HasLocationData("RooftopLocationPoint", nameof(RooftopPlacementLong), nameof(RooftopPlacementLat))]
     public partial class Risk_Report : RiskEntityWithSyncMetadata, IFlightKitEntityWithReportId
     {
         public Risk_Report()
@@ -113,7 +114,8 @@ namespace FlightKit.DataAccess.Domain.Data.Entity
         public string InaccessibleAreaComment { get; set; }
         public bool? IsSprinklerNotUpdated { get; set; }
         public bool? IsWindNotUpdated { get; set; }
-
+        public double? RooftopPlacementLat { get; set; }
+        public double? RooftopPlacementLong { get; set; }
         public ICollection<Risk_AdditionDate> AdditionDates { get; set; }
         public ICollection<Risk_Comment> Comments { get; set; }
         public ICollection<Risk_Exposure> Exposures { get; set; }

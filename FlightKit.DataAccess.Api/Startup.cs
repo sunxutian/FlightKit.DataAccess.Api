@@ -63,7 +63,26 @@ namespace FlightKit.DataAccess.Api
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddMvc();
-
+            services.AddSwaggerGen(c =>
+            {
+                c.SwaggerDoc("v1", new Swashbuckle.AspNetCore.Swagger.Info
+                {
+                    Title = "FlightKit Address Validation Api",
+                    Version = "v1",
+                });
+                c.DescribeStringEnumsInCamelCase();
+                c.AddSecurityDefinition("api-key", new Swashbuckle.AspNetCore.Swagger.ApiKeyScheme
+                {
+                    Description = "AWS Api GateWay Key",
+                    Name = "X-API-KEY",
+                    Type = "apiKey",
+                    In = "header"
+                });
+                c.AddSecurityRequirement(new Dictionary<string, IEnumerable<string>>
+                {
+                    {"api-key", new []{"readAccess", "writeAccess"} }
+                });
+            });
             // Add S3 to the ASP.NET Core dependency injection framework.
             services.AddAWSService<Amazon.S3.IAmazonS3>();
             services.AddDbContext<FlightKitDbContext>(opt => opt.UseSqlServer(Configuration.GetConnectionString("FlightKitConnectionString")));
@@ -98,7 +117,7 @@ namespace FlightKit.DataAccess.Api
             {
                 app.UseDeveloperExceptionPage();
             }
-
+            app.UseCors("AnyOrigin");
             app.UseWebSockets();
 
             // add http for Schema at default url /graphql
@@ -114,9 +133,23 @@ namespace FlightKit.DataAccess.Api
 
                 // use voyager middleware at default url /ui/voyager
                 app.UseGraphQLVoyager(new GraphQLVoyagerOptions());
-
             }
 
+            app.UseSwagger(c =>
+            {
+                c.PreSerializeFilters.Add((swaggerDoc, request) =>
+                {
+                    swaggerDoc.Schemes = new List<string> { request.Scheme };
+                    swaggerDoc.Schemes.Add("https");
+                    swaggerDoc.Schemes = swaggerDoc.Schemes.Distinct().ToList();
+                });
+            });
+
+            app.UseSwaggerUI(c =>
+            {
+                c.SwaggerEndpoint("/swagger/v1/swagger.json", "FlightKit Address Validation Api");
+                c.RoutePrefix = string.Empty;
+            });
             app.UseMvc();
         }
         private void InitializeContainer(IApplicationBuilder app)
@@ -231,7 +264,6 @@ namespace FlightKit.DataAccess.Api
             }
 
             container.RegisterSingleton<FlightKitDataAccessQuery>();
-            container.RegisterSingleton<FlightKistDataAccessSubscription>();
         }
 
         private void SetupAutoMapper(Container container)
@@ -269,6 +301,18 @@ namespace FlightKit.DataAccess.Api
                 .GetCustomAttribute<NotTrackDbChangeAttribute>(true) != null
                     || context.Consumer?.Target?
                 .GetCustomAttribute<NotTrackDbChangeAttribute>(true) != null;
+
+            container.RegisterConditional(typeof(IDbRepository<>), context =>
+            {
+                var entityType = context.ServiceType.GetGenericArguments()[0];
+                var isFkDb = typeof(IFlightKitEntity).IsAssignableFrom(entityType);
+                var dbContextType = typeof(FlightKitDbContext);
+
+                return typeof(LocationDbRepository<,>).MakeGenericType(dbContextType, entityType);
+            }, Lifestyle.Scoped, c =>
+             c.ServiceType.IsGenericType &&
+             c.ServiceType.GetGenericArguments()[0].GetCustomAttribute<HasLocationDataAttribute>() != null);
+
             container.RegisterConditional(typeof(IDbRepository<>), typeof(FlightKitReadonlyDbRepository<>),
                 Lifestyle.Scoped,
                 context => noTrackChange(context) && !context.Handled);
